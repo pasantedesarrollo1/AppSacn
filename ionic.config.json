@@ -1,0 +1,7 @@
+{
+  "name": "AppScan",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}

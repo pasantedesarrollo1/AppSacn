@@ -1,30 +1,18 @@
-import { useProductStore } from '@/stores/productStore';
+// api.ts
+import axios from 'axios'
 
-export const getProductDetails = async (code: string) => {
-  console.log('getProductDetails llamado con código:', code);
+const api = axios.create({
+  baseURL: `https://${import.meta.env.VITE_API_URL}`
+})
 
-  const productStore = useProductStore();
-  const product = productStore.getProductByCode(code);
-  
-  if (product) {
-    console.log('Producto encontrado:', product);
-    return product;
-  } else {
-    console.log('Producto no encontrado para el código:', code);
-    throw new Error('Producto no disponible');
+export const getProductDetails = async (sku: string) => {
+  try {
+    const response = await api.get(`/inventory/product/show-by-sku?sku=${sku}`)
+    return response.data.data
+  } catch (error) {
+    console.error('Error fetching product details:', error)
+    throw error
   }
 }
-  
-  // Implementación futura con API real
-  /*
-  import axios from 'axios'
-  
-  const api = axios.create({
-    baseURL: 'https://api.example.com' // Reemplaza con tu URL base de la API
-  })
-  
-  export const getProductDetails = async (code: string) => {
-    const response = await api.get(`/products/${code}`)
-    return response.data
-  }
-  */
+
+export { api }

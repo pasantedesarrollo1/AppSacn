@@ -15,13 +15,13 @@
         <p>{{ error }}</p>
       </div>
       <div v-else-if="product" class="product-details">
-        <h2>{{ product.name }}</h2>
-        <p>Código: {{ product.code }}</p>
-        <p class="price">Precio: ${{ (product.price / 100).toFixed(2) }}</p>
-        <p>Categoría: {{ product.category }}</p>
-        <p>Stock: {{ product.stock }}</p>
-        <p>Ubicación: {{ product.location }}</p>
-        <p>{{ product.description }}</p>
+        <h2>Nombre: {{ product.name }}</h2>
+        <div v-if="productImage" class="product-image">
+          <img :src="productImage" alt="Imagen del producto" />
+        </div>
+        <p v-else>Imagen: No disponible</p>
+        <p class="price">Precio: ${{ product.price.toFixed(2) }}</p>
+        <p>Descripción: {{ product.description || 'No disponible' }}</p>
       </div>
     </ion-content>
   </ion-modal>
@@ -32,14 +32,21 @@ import { IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonSpinner, IonI
 import { alertCircleOutline } from 'ionicons/icons'
 import { useScanStore } from '@/stores/scanStore'
 import { useProductQuery } from '@/hooks/useProductQuery'
-import { watch, onMounted, onUnmounted, ref } from 'vue'
+import { watch, onMounted, onUnmounted, ref, computed } from 'vue'
 
 const scanStore = useScanStore()
 const { fetchProduct } = useProductQuery()
 
 const isLoading = ref(false)
 const error = ref<string | null>(null)
-const product = ref(null)
+const product = ref<any>(null)
+
+const productImage = computed(() => {
+  if (product.value && product.value.images && product.value.images.length > 0) {
+    return product.value.images[0].thumbnail_full_path
+  }
+  return null
+})
 
 watch(() => scanStore.currentProductCode, async (newCode) => {
   if (newCode) {
@@ -108,5 +115,17 @@ onUnmounted(() => {
   font-size: 1.5em;
   font-weight: bold;
   color: var(--ion-color-primary);
+}
+
+.product-image {
+  width: 100%;
+  max-width: 300px;
+  margin: 20px 0;
+}
+
+.product-image img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 </style>

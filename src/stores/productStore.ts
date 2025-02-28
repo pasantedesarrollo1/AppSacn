@@ -1,67 +1,68 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
-interface Product {
-  id: number
-  code: string
-  name: string
-  price: number
-  category: string
-  stock: number
-  location: string
-  image: string
-  description: string
+export interface Product {
+  id: number;
+  code: string;
+  name: string;
+  price: number;
+  category: string;
+  stock: number;
+  location: string;
+  image: string;
+  description: string;
 }
 
 export const useProductStore = defineStore('product', () => {
   const products = ref<Product[]>([
     {
-      id: 1,
-      code: '7501234567890',
+      id: 2154895,
+      code: '2154895',
       name: 'Smartphone Galaxy A53',
       price: 1299000,
       category: 'Electrónicos',
       stock: 15,
       location: 'Bodega A - Estante 3',
-      image: '/assets/smartphone.jpg',
+      image: 'https://www.cocinista.es/download/bancorecursos/recetas/cocinar-la-carne-de-vacuno.jpg',
       description: 'Smartphone Samsung Galaxy A53 con 128GB de almacenamiento, 6GB RAM, pantalla Super AMOLED de 6.5 pulgadas y cámara cuádruple de 64MP.'
     },
-    // ... otros productos ...
-  ])
-
-  const getProductByCode = (code: string): Product => {
-    const product = products.value.find(p => p.code === code)
-    
-    if (!product) {
-      return {
-        id: 0,
-        code: code,
-        name: 'Producto no encontrado',
-        price: 0,
-        category: 'N/A',
-        stock: 0,
-        location: 'N/A',
-        image: '/assets/not-found.jpg',
-        description: 'No se encontró información para este producto.'
-      }
+    {
+      id: 3456789,
+      code: '3456789',
+      name: 'Laptop ProBook 450',
+      price: 2499000,
+      category: 'Computadores',
+      stock: 8,
+      location: 'Bodega B - Estante 1',
+      image: 'https://www.cocinista.es/download/bancorecursos/recetas/cocinar-la-carne-de-vacuno.jpg',
+      description: 'Laptop HP ProBook 450 G8 con procesador Intel Core i7, 16GB RAM, 512GB SSD y pantalla de 15.6 pulgadas Full HD.'
+    },
+    {
+      id: 7890123,
+      code: '7890123',
+      name: 'Audífonos Bluetooth XB900',
+      price: 599000,
+      category: 'Audio',
+      stock: 20,
+      location: 'Bodega A - Estante 5',
+      image: 'https://www.cocinista.es/download/bancorecursos/recetas/cocinar-la-carne-de-vacuno.jpg',
+      description: 'Audífonos inalámbricos con cancelación de ruido, 30 horas de batería y sonido de alta resolución.'
     }
-    
-    return product
-  }
+  ]);
 
-  const fetchProductFromAPI = async (code: string): Promise<Product> => {
-    try {
-      await new Promise(resolve => setTimeout(resolve, 300))
-      return getProductByCode(code)
-    } catch (error) {
-      console.error('Error al obtener producto:', error)
-      throw error
-    }
-  }
+  const getProductByCode = (code: string): Product | null => {
+    return products.value.find(p => p.code === code) || null;
+  };
+
+  const fetchProductFromAPI = async (code: string): Promise<Product | null> => {
+    // Simulamos una pequeña latencia como en una API real
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return getProductByCode(code);
+  };
 
   return {
     products,
     getProductByCode,
     fetchProductFromAPI
-  }
-})
+  };
+});

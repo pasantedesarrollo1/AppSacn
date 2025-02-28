@@ -1,93 +1,65 @@
 <template>
   <ion-page>
-    <div class="relative w-full h-full flex justify-center items-center bg-black">
-      <!-- Pantalla de guardapantallas (GIF) -->
-      <div class="absolute inset-0 flex justify-center items-center z-10">
-        <img src="https://www.educaciontrespuntocero.com/wp-content/uploads/2019/06/homer.gif" alt="Screensaver" class="max-w-full max-h-full object-contain" />
+    <ion-content class="ion-padding">
+      <div class="flex flex-col items-center justify-center h-full">
+        <h1 class="text-2xl font-bold mb-4">Escáner de Productos</h1>
+        <p class="mb-8 text-center">Escanee un código de barras o ingrese el código manualmente</p>
+        <input
+          ref="scanInput"
+          v-model="manualCode"
+          @keyup.enter="processManualCode"
+          class="w-64 p-2 mb-4 border rounded"
+          placeholder="Ingrese código manualmente"
+        />
+        <p class="text-sm text-gray-500">Código actual: {{ currentCode }}</p>
       </div>
-      
-      <!-- Input invisible pero funcional para capturar el código de barras -->
-      <input
-        ref="barcodeInput"
-        type="text"
-        v-model="barcodeValue"
-        @input="handleBarcodeInput"
-        class="absolute opacity-[0.01] w-px h-px z-20 border-none bg-transparent text-transparent pointer-events-auto"
-        autocomplete="off"
-        autofocus
-      />
-    </div>
+    </ion-content>
   </ion-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { IonPage } from '@ionic/vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { IonPage, IonContent } from '@ionic/vue'
 import { useRouter } from 'vue-router'
-import { useResourceOptimizer } from '../composables/useResourceOptimizer'
+import { useScanStore } from '../stores/scanStore'
 
 const router = useRouter()
-const barcodeInput = ref<HTMLInputElement | null>(null)
-const barcodeValue = ref('')
-const isProcessing = ref(false)
-const inputTimeout = ref<number | null>(null)
-const { releaseResources, restoreResources } = useResourceOptimizer()
+const scanStore = useScanStore()
+const scanInput = ref<HTMLInputElement | null>(null)
+const manualCode = ref('')
+const currentCode = ref('')
 
-const handleBarcodeInput = () => {
-  if (inputTimeout.value) {
-    clearTimeout(inputTimeout.value)
+const processCode = (code: string) => {
+  if (code && !scanStore.isProcessing) {
+    scanStore.setProcessing(true)
+    router.push(`/product/${code}`)
+    scanStore.clearBuffer()
+    manualCode.value = ''
   }
-  
-  inputTimeout.value = window.setTimeout(() => {
-    if (barcodeValue.value && !isProcessing.value) {
-      processBarcode(barcodeValue.value)
+}
+
+const processManualCode = () => {
+  processCode(manualCode.value)
+}
+
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    const code = scanStore.getBuffer()
+    if (code) {
+      processCode(code)
     }
-  }, 100)
-}
-
-const processBarcode = (code: string) => {
-  if (isProcessing.value || !code) return
-  
-  isProcessing.value = true
-  
-  router.push(`/product/${code}`)
-  
-  barcodeValue.value = ''
-  
-  setTimeout(() => {
-    router.push('/home')
-    isProcessing.value = false
-    focusInput()
-  }, 5000)
-}
-
-const focusInput = () => {
-  setTimeout(() => {
-    if (barcodeInput.value) {
-      barcodeInput.value.focus()
-    }
-  }, 100)
-}
-
-watch(() => router.currentRoute.value.path, (newPath) => {
-  if (newPath === '/home') {
-    isProcessing.value = false
-    barcodeValue.value = ''
-    focusInput()
+  } else {
+    scanStore.addToBuffer(event.key)
+    currentCode.value = scanStore.getBuffer()
   }
-})
+}
 
 onMounted(() => {
-  focusInput()
-  document.addEventListener('click', focusInput)
-  restoreResources()
+  window.addEventListener('keydown', handleKeyDown)
+  scanInput.value?.focus()
 })
 
 onUnmounted(() => {
-  document.removeEventListener('click', focusInput)
-  if (inputTimeout.value) {
-    clearTimeout(inputTimeout.value)
-  }
-  releaseResources()
+  window.removeEventListener('keydown', handleKeyDown)
 })
 </script>

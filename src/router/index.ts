@@ -1,8 +1,8 @@
-import { createRouter, createWebHistory } from '@ionic/vue-router';
-import HomePage from '../views/HomePage.vue';
-import ProductPage from '../views/ProductPage.vue';
+import { createRouter, createWebHistory } from '@ionic/vue-router'
+import { RouteRecordRaw } from 'vue-router'
+import HomePage from '../views/HomePage.vue'
 
-const routes = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     redirect: '/home'
@@ -14,15 +14,14 @@ const routes = [
   },
   {
     path: '/product/:code',
-    name: 'Product',
-    component: ProductPage,
-    props: true
+    name: 'ProductDetails',
+    component: () => import('../views/ProductDetails.vue')
   }
-];
+]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
-});
+})
 
-export default router;
+export default router

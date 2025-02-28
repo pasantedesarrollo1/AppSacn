@@ -1,13 +1,8 @@
 <template>
-  <ion-modal :is-open="scanStore.isModalOpen">
+  <ion-modal :is-open="scanStore.isModalOpen" class="fullscreen-modal">
     <ion-header>
       <ion-toolbar>
         <ion-title>Detalles del Producto</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="scanStore.closeModal()">
-            <ion-icon :icon="closeOutline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
@@ -33,8 +28,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonSpinner, IonIcon, IonButtons, IonButton } from '@ionic/vue'
-import { alertCircleOutline, closeOutline } from 'ionicons/icons'
+import { IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonSpinner, IonIcon } from '@ionic/vue'
+import { alertCircleOutline } from 'ionicons/icons'
 import { useScanStore } from '@/stores/scanStore'
 import { useProductQuery } from '@/hooks/useProductQuery'
 import { watch, onMounted, onUnmounted, ref } from 'vue'
@@ -72,12 +67,11 @@ watch(() => scanStore.currentProductCode, async (newCode) => {
 watch(() => scanStore.isModalOpen, (isOpen) => {
   console.log('Estado del modal:', isOpen ? 'abierto' : 'cerrado')
   if (!isOpen) {
-    // Esperamos a que el modal se cierre completamente antes de limpiar los datos
     setTimeout(() => {
       product.value = null
       error.value = null
       isLoading.value = false
-    }, 300) // 300ms debería ser suficiente para la animación de cierre del modal
+    }, 300)
   }
 })
 
@@ -91,6 +85,11 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.fullscreen-modal::part(content) {
+  width: 100%;
+  height: 100%;
+}
+
 .loading-container, .error-container, .product-details {
   display: flex;
   flex-direction: column;

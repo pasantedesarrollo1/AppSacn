@@ -28,9 +28,6 @@
         <p>Ubicación: {{ product.location }}</p>
         <p>{{ product.description }}</p>
       </div>
-      <div v-else class="error-container">
-        <p>No hay información disponible</p>
-      </div>
     </ion-content>
   </ion-modal>
 </template>
@@ -75,8 +72,12 @@ watch(() => scanStore.currentProductCode, async (newCode) => {
 watch(() => scanStore.isModalOpen, (isOpen) => {
   console.log('Estado del modal:', isOpen ? 'abierto' : 'cerrado')
   if (!isOpen) {
-    product.value = null
-    error.value = null
+    // Esperamos a que el modal se cierre completamente antes de limpiar los datos
+    setTimeout(() => {
+      product.value = null
+      error.value = null
+      isLoading.value = false
+    }, 300) // 300ms debería ser suficiente para la animación de cierre del modal
   }
 })
 

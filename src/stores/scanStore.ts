@@ -6,6 +6,8 @@ export const useScanStore = defineStore('scan', () => {
   const isProcessing = ref(false)
   const lastScanTime = ref(0)
   const SCAN_TIMEOUT = 100 // Ajustable según la velocidad del escáner
+  const isModalOpen = ref(false)
+  const currentProductCode = ref('')
 
   function addToBuffer(char: string) {
     const now = Date.now()
@@ -30,11 +32,25 @@ export const useScanStore = defineStore('scan', () => {
     return scanBuffer.value
   }
 
+  function openModal(code: string) {
+    currentProductCode.value = code
+    isModalOpen.value = true
+  }
+
+  function closeModal() {
+    isModalOpen.value = false
+    currentProductCode.value = ''
+  }
+
   return {
     isProcessing,
+    isModalOpen,
+    currentProductCode,
     addToBuffer,
     clearBuffer,
     setProcessing,
-    getBuffer
+    getBuffer,
+    openModal,
+    closeModal
   }
 })

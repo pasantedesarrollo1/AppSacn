@@ -3,57 +3,80 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Detalles del Producto</ion-title>
+        <ion-buttons slot="end">
+          <ion-button @click="scanStore.closeModal()">
+            <ion-icon :icon="closeOutline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
-      <div v-if="productQuery.isLoading" class="loading-container">
+      <div v-if="isLoading" class="loading-container">
         <ion-spinner name="crescent"></ion-spinner>
         <p>Cargando detalles del producto...</p>
       </div>
-      <div v-else-if="productQuery.isError" class="error-container">
+      <div v-else-if="error" class="error-container">
         <ion-icon :icon="alertCircleOutline" class="error-icon"></ion-icon>
-        <p>Error al cargar el producto. Producto no encontrado o código inválido.</p>
+        <p>Error al cargar el producto. {{ error }}</p>
       </div>
-      <div v-else-if="productQuery.data" class="product-details">
-        <h2>{{ productQuery.data.name }}</h2>
-        <p>Código: {{ productQuery.data.code }}</p>
-        <p class="price">Precio: ${{ (productQuery.data.price / 100).toFixed(2) }}</p>
-        <p>Categoría: {{ productQuery.data.category }}</p>
-        <p>Stock: {{ productQuery.data.stock }}</p>
-        <p>Ubicación: {{ productQuery.data.location }}</p>
-        <p>{{ productQuery.data.description }}</p>
+      <div v-else-if="product" class="product-details">
+        <h2>{{ product.name }}</h2>
+        <p>Código: {{ product.code }}</p>
+        <p class="price">Precio: ${{ (product.price / 100).toFixed(2) }}</p>
+        <p>Categoría: {{ product.category }}</p>
+        <p>Stock: {{ product.stock }}</p>
+        <p>Ubicación: {{ product.location }}</p>
+        <p>{{ product.description }}</p>
       </div>
     </ion-content>
   </ion-modal>
 </template>
 
 <script setup lang="ts">
-import { IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonSpinner, IonIcon } from '@ionic/vue'
-import { alertCircleOutline } from 'ionicons/icons'
+import { IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonSpinner, IonIcon, IonButtons, IonButton } from '@ionic/vue'
+import { alertCircleOutline, closeOutline } from 'ionicons/icons'
 import { useScanStore } from '@/stores/scanStore'
 import { useProductQuery } from '@/hooks/useProductQuery'
-import { watch, onMounted, onUnmounted } from 'vue'
+import { watch, onMounted, onUnmounted, ref } from 'vue'
 
 const scanStore = useScanStore()
 const { productQuery } = useProductQuery()
 
-watch(() => productQuery.data, (newData) => {
-  console.log('Datos del producto actualizados:', newData);
-  if (newData) {
-    scanStore.resetModalTimer();
+const isLoading = ref(false)
+const error = ref(null)
+const product = ref(null)
+
+watch(() => scanStore.currentProductCode, async (newCode) => {
+  if (newCode) {
+    isLoading.value = true
+    error.value = null
+    product.value = null
+    try {
+      const result = await productQuery.refetch()
+      product.value = result.data
+    } catch (err) {
+      error.value = err.message || 'Error al cargar el producto'
+    } finally {
+      isLoading.value = false
+    }
   }
 })
 
 watch(() => scanStore.isModalOpen, (isOpen) => {
-  console.log('Estado del modal:', isOpen ? 'abierto' : 'cerrado');
+  console.log('Estado del modal:', isOpen ? 'abierto' : 'cerrado')
+  if (!isOpen) {
+    // Limpiar datos cuando se cierra el modal
+    product.value = null
+    error.value = null
+  }
 })
 
 onMounted(() => {
-  console.log('ProductModal montado');
+  console.log('ProductModal montado')
 })
 
 onUnmounted(() => {
-  console.log('ProductModal desmontado');
+  console.log('ProductModal desmontado')
 })
 </script>
 

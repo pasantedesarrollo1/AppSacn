@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { getProductDetails } from '@/services/api'
 import { useScanStore } from '@/stores/scanStore'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 
 export function useProductQuery() {
   const queryClient = useQueryClient()
@@ -17,9 +17,15 @@ export function useProductQuery() {
     staleTime: 1000 * 60 * 5, // 5 minutos
   })
 
+  watch(() => productQuery.data, (newData) => {
+    if (newData) {
+      console.log('Datos del producto cargados en useProductQuery:', newData);
+    }
+  })
+
   const fetchProduct = async (code: string) => {
     console.log('fetchProduct llamado con código:', code);
-    await queryClient.prefetchQuery({
+    return queryClient.fetchQuery({
       queryKey: ['product', code],
       queryFn: () => getProductDetails(code),
     })

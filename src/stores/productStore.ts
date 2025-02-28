@@ -27,8 +27,8 @@ export const useProductStore = defineStore('product', () => {
       description: 'Smartphone Samsung Galaxy A53 con 128GB de almacenamiento, 6GB RAM, pantalla Super AMOLED de 6.5 pulgadas y cámara cuádruple de 64MP.'
     },
     {
-      id: '3456789',
-      code: '3456789',
+      id: '359548',
+      code: '359548',
       name: 'Laptop ProBook 450',
       price: 2499000,
       category: 'Computadores',
@@ -38,8 +38,8 @@ export const useProductStore = defineStore('product', () => {
       description: 'Laptop HP ProBook 450 G8 con procesador Intel Core i7, 16GB RAM, 512GB SSD y pantalla de 15.6 pulgadas Full HD.'
     },
     {
-      id: '7890123',
-      code: '7890123',
+      id: '1562547',
+      code: '1562547',
       name: 'Audífonos Bluetooth XB900',
       price: 599000,
       category: 'Audio',

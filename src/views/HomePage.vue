@@ -1,92 +1,93 @@
 <template>
   <ion-page>
-    <ion-header :translucent="true">
-      <ion-toolbar>
-        <ion-title>Formulario</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Formulario</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
-      <div id="container">
-        <div class="input-container">
-          <ion-input
-            class="custom-input"
-            placeholder="Codigo Aqui"
-            @click="handleInputClick"
-            fill="outline"
-            shape="round"
-          ></ion-input>
-        </div>
-        <strong>Ready to create an app?</strong>
-        <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+    <div class="relative w-full h-full flex justify-center items-center bg-black">
+      <!-- Pantalla de guardapantallas (GIF) -->
+      <div class="absolute inset-0 flex justify-center items-center z-10">
+        <img src="https://www.educaciontrespuntocero.com/wp-content/uploads/2019/06/homer.gif" alt="Screensaver" class="max-w-full max-h-full object-contain" />
       </div>
-    </ion-content>
+      
+      <!-- Input invisible pero funcional para capturar el código de barras -->
+      <input
+        ref="barcodeInput"
+        type="text"
+        v-model="barcodeValue"
+        @input="handleBarcodeInput"
+        class="absolute opacity-[0.01] w-px h-px z-20 border-none bg-transparent text-transparent pointer-events-auto"
+        autocomplete="off"
+        autofocus
+      />
+    </div>
   </ion-page>
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonInput } from '@ionic/vue';
-//import { ref } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { IonPage } from '@ionic/vue'
+import { useRouter } from 'vue-router'
+import { useResourceOptimizer } from '../composables/useResourceOptimizer'
 
-const handleInputClick = () => {
-  console.log('Input clicked!');
+const router = useRouter()
+const barcodeInput = ref<HTMLInputElement | null>(null)
+const barcodeValue = ref('')
+const isProcessing = ref(false)
+const inputTimeout = ref<number | null>(null)
+const { releaseResources, restoreResources } = useResourceOptimizer()
+
+const handleBarcodeInput = () => {
+  if (inputTimeout.value) {
+    clearTimeout(inputTimeout.value)
+  }
   
-};
+  inputTimeout.value = window.setTimeout(() => {
+    if (barcodeValue.value && !isProcessing.value) {
+      processBarcode(barcodeValue.value)
+    }
+  }, 100)
+}
+
+const processBarcode = (code: string) => {
+  if (isProcessing.value || !code) return
+  
+  isProcessing.value = true
+  
+  router.push(`/product/${code}`)
+  
+  barcodeValue.value = ''
+  
+  setTimeout(() => {
+    router.push('/home')
+    isProcessing.value = false
+    focusInput()
+  }, 5000)
+}
+
+const focusInput = () => {
+  setTimeout(() => {
+    if (barcodeInput.value) {
+      barcodeInput.value.focus()
+    }
+  }, 100)
+}
+
+watch(() => router.currentRoute.value.path, (newPath) => {
+  if (newPath === '/home') {
+    isProcessing.value = false
+    barcodeValue.value = ''
+    focusInput()
+  }
+})
+
+onMounted(() => {
+  focusInput()
+  document.addEventListener('click', focusInput)
+  restoreResources()
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', focusInput)
+  if (inputTimeout.value) {
+    clearTimeout(inputTimeout.value)
+  }
+  releaseResources()
+})
 </script>
-
-<style scoped>
-#container {
-  text-align: center;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 0 20px;
-}
-
-.input-container {
-  margin-bottom: 30px;
-}
-
-.custom-input {
-  --background: #f0f5ff;
-  --color: #333;
-  --placeholder-color: #666;
-  --border-radius: 10px;
-  --padding-start: 15px;
-  --padding-end: 15px;
-  --box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  max-width: 300px;
-  margin: 0 auto;
-}
-
-.custom-input:focus-within {
-  --background: #e6f0ff;
-  --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-  margin-top: 20px;
-  display: block;
-}
-
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-  color: #8c8c8c;
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
-}
-</style>

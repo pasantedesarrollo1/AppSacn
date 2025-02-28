@@ -2,9 +2,6 @@ import { useProductStore } from '@/stores/productStore';
 
 export const getProductDetails = async (code: string) => {
   console.log('getProductDetails llamado con código:', code);
-  
-  // Reducir el retraso simulado a 300ms para que sea más rápido
-  // await new Promise(resolve => setTimeout(resolve, 300));
 
   const productStore = useProductStore();
   const product = productStore.getProductByCode(code);
@@ -14,7 +11,7 @@ export const getProductDetails = async (code: string) => {
     return product;
   } else {
     console.log('Producto no encontrado para el código:', code);
-    throw new Error('Producto no encontrado');
+    throw new Error('Producto no disponible');
   }
 }
   

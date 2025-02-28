@@ -46,9 +46,7 @@ export const useScanStore = defineStore('scan', () => {
     if (modalTimer.value) {
       clearTimeout(modalTimer.value)
     }
-    // Aumentar el tiempo a 20 segundos para dar más margen
-    // modalTimer.value = setTimeout(closeModal, 20000) 
-    // Comentado el temporizador automático para evitar cierre prematuro
+    modalTimer.value = setTimeout(closeModal, 5000) // Cierra el modal después de 5 segundos
     console.log('Temporizador del modal reiniciado');
   }
 

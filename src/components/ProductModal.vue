@@ -17,7 +17,7 @@
       </div>
       <div v-else-if="error" class="error-container">
         <ion-icon :icon="alertCircleOutline" class="error-icon"></ion-icon>
-        <p>Error al cargar el producto. {{ error }}</p>
+        <p>{{ error }}</p>
       </div>
       <div v-else-if="product" class="product-details">
         <h2>{{ product.name }}</h2>
@@ -43,7 +43,7 @@ const scanStore = useScanStore()
 const { productQuery } = useProductQuery()
 
 const isLoading = ref(false)
-const error = ref(null)
+const error = ref<string | null>(null)
 const product = ref(null)
 
 watch(() => scanStore.currentProductCode, async (newCode) => {
@@ -55,10 +55,14 @@ watch(() => scanStore.currentProductCode, async (newCode) => {
       const result = await productQuery.refetch()
       product.value = result.data
     } catch (err) {
-      error.value = err.message || 'Error al cargar el producto'
+      error.value = err.message === 'Producto no disponible' 
+        ? 'Producto no disponible' 
+        : 'Error al cargar el producto'
     } finally {
       isLoading.value = false
     }
+    // Reiniciar el temporizador cada vez que se escanea un nuevo producto
+    scanStore.resetModalTimer()
   }
 })
 

@@ -15,6 +15,10 @@ export function useProductQuery() {
     },
     enabled: computed(() => !!scanStore.currentProductCode),
     staleTime: 1000 * 60 * 5, // 5 minutos
+    retry: false, // No reintentar en caso de error
+    onError: (error) => {
+      console.error('Error en la consulta:', error.message);
+    }
   })
 
   watch(() => productQuery.data, (newData) => {
@@ -25,10 +29,16 @@ export function useProductQuery() {
 
   const fetchProduct = async (code: string) => {
     console.log('fetchProduct llamado con código:', code);
-    return queryClient.fetchQuery({
-      queryKey: ['product', code],
-      queryFn: () => getProductDetails(code),
-    })
+    try {
+      const result = await queryClient.fetchQuery({
+        queryKey: ['product', code],
+        queryFn: () => getProductDetails(code),
+      })
+      return result
+    } catch (error) {
+      console.error('Error en fetchProduct:', error.message);
+      throw error; // Re-lanzar el error para que pueda ser manejado en ProductModal
+    }
   }
 
   return {

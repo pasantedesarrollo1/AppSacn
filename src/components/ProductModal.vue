@@ -28,6 +28,9 @@
         <p>Ubicación: {{ product.location }}</p>
         <p>{{ product.description }}</p>
       </div>
+      <div v-else class="error-container">
+        <p>No hay información disponible</p>
+      </div>
     </ion-content>
   </ion-modal>
 </template>
@@ -40,7 +43,7 @@ import { useProductQuery } from '@/hooks/useProductQuery'
 import { watch, onMounted, onUnmounted, ref } from 'vue'
 
 const scanStore = useScanStore()
-const { productQuery } = useProductQuery()
+const { fetchProduct } = useProductQuery()
 
 const isLoading = ref(false)
 const error = ref<string | null>(null)
@@ -48,20 +51,23 @@ const product = ref(null)
 
 watch(() => scanStore.currentProductCode, async (newCode) => {
   if (newCode) {
+    console.log('Nuevo código escaneado:', newCode)
     isLoading.value = true
     error.value = null
     product.value = null
     try {
-      const result = await productQuery.refetch()
-      product.value = result.data
+      const result = await fetchProduct(newCode)
+      product.value = result
+      console.log('Producto cargado:', product.value)
     } catch (err) {
+      console.error('Error capturado:', err.message)
       error.value = err.message === 'Producto no disponible' 
         ? 'Producto no disponible' 
         : 'Error al cargar el producto'
+      console.log('Error establecido:', error.value)
     } finally {
       isLoading.value = false
     }
-    // Reiniciar el temporizador cada vez que se escanea un nuevo producto
     scanStore.resetModalTimer()
   }
 })
@@ -69,7 +75,6 @@ watch(() => scanStore.currentProductCode, async (newCode) => {
 watch(() => scanStore.isModalOpen, (isOpen) => {
   console.log('Estado del modal:', isOpen ? 'abierto' : 'cerrado')
   if (!isOpen) {
-    // Limpiar datos cuando se cierra el modal
     product.value = null
     error.value = null
   }

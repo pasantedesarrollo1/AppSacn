@@ -31,6 +31,7 @@ export const useScanStore = defineStore('scan', () => {
     currentProductCode.value = code
     isModalOpen.value = true
     resetModalTimer()
+    console.log('Modal abierto con código:', code)
   }
 
   function closeModal() {
@@ -40,6 +41,7 @@ export const useScanStore = defineStore('scan', () => {
       clearTimeout(modalTimer.value)
       modalTimer.value = null
     }
+    console.log('Modal cerrado')
   }
 
   function resetModalTimer() {

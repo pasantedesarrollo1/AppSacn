@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content class="ion-padding">
       <div class="full-screen-gif">
-        <!-- Reemplaza con tu GIF -->
         <img src="@/assets/download.gif" alt="Verificador de Precios" />
       </div>
     </ion-content>
@@ -26,7 +25,11 @@ const handleKeyDown = async (event: KeyboardEvent) => {
     console.log('Código escaneado:', code);
     if (code) {
       scanStore.openModal(code)
-      await fetchProduct(code)
+      try {
+        await fetchProduct(code)
+      } catch (error) {
+        console.error('Error al buscar el producto:', error)
+      }
       scanStore.clearBuffer()
     }
   } else {

@@ -1,60 +1,36 @@
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Escáner de Productos</ion-title>
-      </ion-toolbar>
-    </ion-header>
     <ion-content class="ion-padding">
-      <div class="flex flex-col items-center justify-center h-full">
-        <h1 class="text-2xl font-bold mb-4">Escáner de Productos Modal</h1>
-        <p class="mb-8 text-center">Escanee un código de barras o ingrese el código manualmente</p>
-        <ion-input
-          v-model="manualCode"
-          placeholder="Ingrese código manualmente"
-          @keyup.enter="processManualCode"
-          class="mb-4"
-        ></ion-input>
-        <ion-button @click="processManualCode">Buscar Producto</ion-button>
-        <p class="text-sm text-gray-500 mt-4">Código actual: {{ currentCode }}</p>
+      <div class="full-screen-gif">
+        <!-- Reemplaza con tu GIF -->
+        <img src="@/assets/download.gif" alt="Verificador de Precios" />
       </div>
     </ion-content>
-    <product-details-modal></product-details-modal>
+    <product-modal></product-modal>
   </ion-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonInput, IonButton } from '@ionic/vue'
-import { useScanStore } from '../stores/scanStore'
-import ProductDetailsModal from '../components/ProductDetailsModal.vue'
+import { onMounted, onUnmounted } from 'vue'
+import { IonPage, IonContent } from '@ionic/vue'
+import { useScanStore } from '@/stores/scanStore'
+import { useProductQuery } from '@/hooks/useProductQuery'
+import ProductModal from '@/components/ProductModal.vue'
 
 const scanStore = useScanStore()
-const manualCode = ref('')
-const currentCode = ref('')
+const { fetchProduct } = useProductQuery()
 
-const processCode = (code: string) => {
-  if (code && !scanStore.isProcessing) {
-    scanStore.setProcessing(true)
-    scanStore.openModal(code)
-    scanStore.clearBuffer()
-    manualCode.value = ''
-  }
-}
-
-const processManualCode = () => {
-  processCode(manualCode.value)
-}
-
-const handleKeyDown = (event: KeyboardEvent) => {
+const handleKeyDown = async (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
     const code = scanStore.getBuffer()
+    console.log('Código escaneado:', code);
     if (code) {
-      processCode(code)
+      scanStore.openModal(code)
+      await fetchProduct(code)
+      scanStore.clearBuffer()
     }
   } else {
     scanStore.addToBuffer(event.key)
-    currentCode.value = scanStore.getBuffer()
   }
 }
 
@@ -66,3 +42,14 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
 })
 </script>
+
+<style scoped>
+.full-screen-gif {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+</style>

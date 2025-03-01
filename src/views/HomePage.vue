@@ -1,38 +1,61 @@
 <template>
-  <ion-page class="bg-gradient-to-br from-blue-900 to-black overflow-hidden">
+  <ion-page class="h-screen bg-gradient-to-br from-blue-100 via-white to-blue-50 flex flex-col">
     <!-- Header with logo and settings -->
     <ion-header class="ion-no-border bg-transparent">
-      <ion-toolbar class="bg-transparent px-6 py-4">
-        <!-- Logo on the left -->
-        <div slot="start" class="flex items-center">
+      <ion-toolbar class="bg-white/80 backdrop-blur-sm shadow-sm px-4 py-2">
+        <div slot="start" class="rounded-xl overflow-hidden">
           <img 
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/icon-8MCEmzr2B4jGYomAUIvyfmO7QjiDyr.png" 
-            alt="4u Logo" 
-            class="w-16 h-16 rounded-2xl shadow-lg border-2 border-white/20" 
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/icon-AIeF9eqkpixXd01gW0AfihCSEF9lSy.png" 
+            alt="Logo" 
+            class="w-10 h-10"
           />
-
         </div>
         
-        <!-- Settings button on the right -->
         <ion-buttons slot="end">
           <ion-button 
             @click="openConfigModal" 
-            class="bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 rounded-full shadow-lg w-16 h-16 flex items-center justify-center transition-all duration-300 ease-in-out"
+            class="p-1.5 rounded-full hover:bg-blue-100 transition-colors"
           >
-            <ion-icon :icon="settingsOutline" class="text-3xl"></ion-icon>
+            <ion-icon :icon="settingsOutline" class="w-5 h-5 text-blue-600"></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
     <!-- Main content -->
-    <ion-content class="ion-padding flex items-center justify-center">
-      <div class="gif-container rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20">
-        <img 
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/download-TVzHisrYubJQfEL42aPxweWIFXwkIZ.gif" 
-          alt="EVOLUCAO SISTEMA en múltiples dispositivos" 
-          class="gif-image"
-        />
+    <ion-content class="ion-no-padding">
+      <div class="h-full flex flex-col items-center justify-center p-4">
+        <div class="flex-1 w-full flex items-center justify-center">
+          <div class="w-full max-w-4xl relative group">
+            <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000 animate-pulse"></div>
+            <div class="relative bg-black rounded-2xl shadow-xl overflow-hidden aspect-video">
+              <img 
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/download-8CUxOayMLOY1Gg5LhbGkE0e1Ay0Akb.gif" 
+                alt="Dispositivos" 
+                class="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex flex-col items-center gap-3 mt-8">
+          <div class="flex items-center gap-3 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-blue-100">
+            <div class="relative">
+              <div class="absolute -inset-0.5 bg-blue-500 rounded-full blur opacity-40 animate-pulse"></div>
+              <div class="relative bg-gradient-to-br from-blue-500 to-blue-700 p-1.5 rounded-full">
+                <ion-icon :icon="scanOutline" class="w-5 h-5 text-white"></ion-icon>
+            </div>
+          </div>
+            <p class="text-blue-800 font-semibold text-base">Acerque un producto al escáner</p>
+          </div>
+
+          <!-- Footer dots -->
+          <div class="flex space-x-2">
+            <span class="animate-pulse inline-block w-2.5 h-2.5 bg-blue-400 rounded-full"></span>
+            <span class="animate-pulse inline-block w-2.5 h-2.5 bg-blue-500 rounded-full delay-150"></span>
+            <span class="animate-pulse inline-block w-2.5 h-2.5 bg-blue-600 rounded-full delay-300"></span>
+          </div>
+        </div>
       </div>
     </ion-content>
 
@@ -42,9 +65,10 @@
 </template>
 
 <script setup lang="ts">
+// El script permanece igual que en la versión anterior
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { IonPage, IonContent, IonHeader, IonToolbar, IonButton, IonIcon, IonButtons } from '@ionic/vue'
-import { settingsOutline } from 'ionicons/icons'
+import { settingsOutline, scanOutline } from 'ionicons/icons'
 import { useScanStore } from '@/stores/scanStore'
 import { useProductQuery } from '@/hooks/useProductQuery'
 import ProductModal from '@/components/ProductModal.vue'
@@ -107,29 +131,4 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
-ion-toolbar {
-  --padding-top: 1rem;
-  --padding-bottom: 1rem;
-}
 
-ion-button::part(native) {
-  padding: 0;
-}
-
-.gif-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  max-width: 90vw;
-  max-height: calc(100vh - 120px); /* Ajustado para el nuevo tamaño del header */
-}
-
-.gif-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-</style>

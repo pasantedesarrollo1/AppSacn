@@ -10,18 +10,17 @@
 
       <div class="flex flex-1 w-full max-w-5xl mx-auto bg-white rounded-2xl overflow-hidden shadow-2xl">
         <!-- Imagen del producto - Lado izquierdo -->
-        <div class="w-1/2 flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-white border-r border-gray-200">
-          <div class="relative w-full h-full" v-if="!isLoading && !error">
-            <img
-              :src="productImage"
-              :alt="product?.name"
-              class="w-full h-full object-contain drop-shadow-xl"
-            />
-          </div>
-          <div v-else-if="isLoading" class="flex items-center justify-center h-full">
+        <div class="w-1/2 relative bg-gradient-to-br from-blue-50 to-white border-r border-gray-200">
+          <img
+            v-if="!isLoading && !error"
+            :src="productImage"
+            :alt="product?.name"
+            class="absolute inset-0 w-full h-full object-contain p-4"
+          />
+          <div v-else-if="isLoading" class="absolute inset-0 flex items-center justify-center">
             <ion-spinner name="crescent"></ion-spinner>
           </div>
-          <div v-else-if="error" class="flex items-center justify-center h-full">
+          <div v-else-if="error" class="absolute inset-0 flex items-center justify-center">
             <ion-icon :icon="alertCircleOutline" class="text-6xl text-red-500"></ion-icon>
           </div>
         </div>

@@ -7,7 +7,7 @@
           <img 
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/icon-AIeF9eqkpixXd01gW0AfihCSEF9lSy.png" 
             alt="Logo" 
-            class="w-10 h-10 object-contain"
+            class="w-12 h-12 object-contain"
           />
         </div>
         
@@ -16,7 +16,11 @@
             @click="openConfigModal" 
             class="p-1.5 rounded-full hover:bg-blue-100 transition-colors"
           >
-            <ion-icon :icon="settingsOutline" class="w-5 h-5 text-blue-600"></ion-icon>
+            <img 
+              src="../assets/iconsajustes.png" 
+              alt="Ajustes" 
+              class="w-12 h-12"
+            />
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -45,7 +49,11 @@
             <div class="relative">
               <div class="absolute -inset-0.5 bg-blue-500 rounded-full blur opacity-40 animate-pulse"></div>
               <div class="relative bg-gradient-to-br from-blue-500 to-blue-700 p-1.5 rounded-full">
-                <ion-icon :icon="scanOutline" class="w-5 h-5 text-white"></ion-icon>
+                <img 
+                  src="../assets/codescan.png" 
+                  alt="Escanear" 
+                  class="w-8 h-8"
+                />
               </div>
             </div>
             <p class="text-blue-800 font-semibold text-base">Acerque un producto al escáner</p>
@@ -67,10 +75,8 @@
 </template>
 
 <script setup lang="ts">
-// El script permanece igual
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { IonPage, IonContent, IonHeader, IonToolbar, IonButton, IonIcon, IonButtons } from '@ionic/vue'
-import { settingsOutline, scanOutline } from 'ionicons/icons'
+import { IonPage, IonContent, IonHeader, IonToolbar, IonButton, IonButtons } from '@ionic/vue'
 import { useScanStore } from '@/stores/scanStore'
 import { useProductQuery } from '@/hooks/useProductQuery'
 import ProductModal from '@/components/ProductModal.vue'

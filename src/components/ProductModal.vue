@@ -37,6 +37,8 @@ import { watch, onMounted, onUnmounted, ref, computed } from 'vue'
 const scanStore = useScanStore()
 const { fetchProduct } = useProductQuery()
 
+const emit = defineEmits(['open'])
+
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const product = ref<any>(null)
@@ -73,6 +75,9 @@ watch(() => scanStore.currentProductCode, async (newCode) => {
 
 watch(() => scanStore.isModalOpen, (isOpen) => {
   console.log('Estado del modal:', isOpen ? 'abierto' : 'cerrado')
+  if (isOpen) {
+    emit('open')
+  }
   if (!isOpen) {
     setTimeout(() => {
       product.value = null

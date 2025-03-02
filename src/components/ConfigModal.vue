@@ -1,96 +1,223 @@
 <template>
   <ion-modal :is-open="isOpen" @didDismiss="handleClose" class="config-modal">
-    <div class="p-4 bg-white rounded-lg shadow-lg max-w-md w-full mx-auto">
-      <div class="flex items-center mb-4 pb-2 border-b">
-        <img 
-          src="../assets/iconsajustes.png" 
-          alt="Configuración" 
-          class="w-7 h-7 mr-2"
-        />
-        <h2 class="text-xl font-medium">Configuraciones</h2>
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="header-content">
+          <img 
+            src="../assets/iconsajustes.png" 
+            alt="Configuración" 
+            class="header-icon"
+          />
+          <h2 class="header-title">Configuraciones</h2>
+        </div>
       </div>
-      <div class="mb-4">
-        <label for="ruc" class="block text-sm font-medium text-gray-700 mb-1">
-          Ingrese su RUC
-        </label>
-        <input
-          id="ruc"
-          v-model="ruc"
-          type="text"
-          inputmode="numeric"
-          pattern="[0-9]*"
-          placeholder="Ej. 2012345678001"
-          @input="validateInput"
-          class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder-gray-700"
-        />
-      </div>
-      <div class="flex justify-between">
-        <button
-          @click="handleClose"
-          class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-        >
-          Cerrar
-        </button>
-        <button
-          @click="saveConfig"
-          :disabled="!isRucValid"
-          :class="[
-            'px-4 py-2 text-white rounded-md transition-colors',
-            isRucValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'
-          ]"
-        >
-          Guardar
-        </button>
+
+      <div class="modal-content">
+        <div class="input-group">
+          <div class="label-container">
+            Ingrese su RUC
+          </div>
+          <ion-input
+            v-model="ruc"
+            type="text"
+            inputmode="numeric"
+            placeholder="Ej.: 1272637289001"
+            class="ruc-input"
+            @ionInput="validateInput"
+            @keydown="preventNonNumeric"
+          ></ion-input>
+        </div>
+
+        <div class="button-group">
+          <ion-button
+            expand="block"
+            color="danger"
+            class="action-button"
+            @click="handleClose"
+          >
+            CERRAR
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            color="success"
+            class="action-button"
+            :disabled="!ruc"
+            @click="saveConfig"
+          >
+            GUARDAR
+          </ion-button>
+        </div>
       </div>
     </div>
   </ion-modal>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { IonModal } from '@ionic/vue'
+import { ref } from 'vue';
+import { IonModal, IonButton, IonInput } from '@ionic/vue';
 
 const props = defineProps<{
   isOpen: boolean
-}>()
+}>();
 
 const emit = defineEmits<{
   (e: 'close'): void
-}>()
+}>();
 
-const ruc = ref('')
-
-const isRucValid = computed(() => ruc.value.length > 0)
+const ruc = ref('');
 
 const handleClose = () => {
-  ruc.value = '' // Limpiar el input
-  emit('close')
-}
+  ruc.value = '';
+  emit('close');
+};
 
 const saveConfig = () => {
-  if (isRucValid.value) {
-    console.log('RUC guardado:', ruc.value)
-    handleClose() // Usar handleClose aquí también para limpiar el input
+  if (ruc.value) {
+    console.log('RUC guardado:', ruc.value);
+    handleClose();
   }
-}
+};
 
-const validateInput = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  input.value = input.value.replace(/\D/g, '')
-  ruc.value = input.value
-}
+const validateInput = (event: CustomEvent) => {
+  const value = event.detail.value;
+  if (value) {
+    ruc.value = value.replace(/[^0-9]/g, '');
+  }
+};
+
+const preventNonNumeric = (event: KeyboardEvent) => {
+  const allowedKeys = ['Backspace', 'ArrowLeft', 'ArrowRight', 'Delete', 'Tab'];
+  if (!/^\d$/.test(event.key) && !allowedKeys.includes(event.key)) {
+    event.preventDefault();
+  }
+};
 </script>
 
 <style scoped>
 .config-modal::part(content) {
+  --width: 90%;
   --max-width: 400px;
   --height: auto;
-  --border-radius: 8px;
-  --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --border-radius: 12px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-input::placeholder {
-  color: #b2bbca; /* Tailwind gray-700 */
-  opacity: 1;
+.modal-container {
+  background: white;
+  overflow: hidden;
+  padding-bottom: 1rem;
+}
+
+.modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a56db;
+  margin: 0;
+}
+
+.modal-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.label-container {
+  color: #1f2937;
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding-left: 0.25rem;
+}
+
+.ruc-input {
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+  --padding-top: 0.875rem;
+  --padding-bottom: 0.875rem;
+  --background: #f9fafb;
+  --border-color: #e5e7eb;
+  --border-radius: 8px;
+  --border-width: 1px;
+  --border-style: solid;
+  --placeholder-color: #9ca3af;
+  --placeholder-opacity: 1;
+  font-size: 1.1rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  padding: 0 0.5rem;
+}
+
+.action-button {
+  margin: 0;
+  --border-radius: 8px;
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.025em;
+  height: 2.75rem;
+}
+
+ion-button[color="danger"] {
+  --background: #dc2626;
+  --background-hover: #b91c1c;
+}
+
+ion-button[color="success"] {
+  --background: #22c55e;
+  --background-hover: #16a34a;
+}
+
+ion-button[disabled] {
+  --background: #9ca3af;
+  opacity: 0.7;
+}
+
+/* Estilos para tablets y dispositivos más grandes */
+@media (min-width: 768px) {
+  .config-modal::part(content) {
+    --max-width: 450px;
+  }
+
+  .header-title {
+    font-size: 1.35rem;
+  }
+
+  .label-container {
+    font-size: 1.2rem;
+  }
+
+  .ruc-input {
+    font-size: 1.15rem;
+  }
+
+  .action-button {
+    font-size: 1rem;
+  }
 }
 </style>

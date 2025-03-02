@@ -16,7 +16,6 @@ import '@ionic/vue/css/text-transformation.css'
 import '@ionic/vue/css/flex-utils.css'
 import '@ionic/vue/css/display.css'
 import './assets/main.css'
-import { MotionPlugin } from '@vueuse/motion'
 
 const pinia = createPinia()
 const app = createApp(App)
@@ -32,7 +31,6 @@ const app = createApp(App)
       },
     },
   })
-  .use(MotionPlugin) // Add this line
 
 router.isReady().then(() => {
   app.mount('#app')

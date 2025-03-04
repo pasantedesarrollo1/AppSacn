@@ -1,5 +1,5 @@
 <template>
-  <ion-modal :is-open="isOpen" @didDismiss="handleClose" class="config-modal">
+  <ion-modal :is-open="isOpen" :backdropDismiss="false" class="config-modal">
     <div class="modal-container">
       <div class="modal-header">
         <div class="header-content">
@@ -26,6 +26,10 @@
             @ionInput="validateInput"
             @keydown="preventNonNumeric"
           ></ion-input>
+          
+          <div v-if="error" class="error-message">
+            {{ error }}
+          </div>
         </div>
 
         <div class="button-group">
@@ -34,6 +38,7 @@
             color="danger"
             class="action-button"
             @click="handleClose"
+            :disabled="!configStore.isConfigured"
           >
             CERRAR
           </ion-button>
@@ -42,10 +47,11 @@
             expand="block"
             color="success"
             class="action-button"
-            :disabled="!ruc"
+            :disabled="!ruc || isVerifying"
             @click="saveConfig"
           >
-            GUARDAR
+            <ion-spinner v-if="isVerifying" name="crescent"></ion-spinner>
+            <span v-else>GUARDAR</span>
           </ion-button>
         </div>
       </div>
@@ -55,27 +61,48 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { IonModal, IonButton, IonInput } from '@ionic/vue';
+import { IonModal, IonButton, IonInput, IonSpinner } from '@ionic/vue';
+import { useConfigStore } from '@/stores/configStore';
+import { verifyRuc, setTenant } from '@/services/api';
 
 const props = defineProps<{
   isOpen: boolean
 }>();
 
 const emit = defineEmits<{
-  (e: 'close'): void
+  (e: 'close'): void,
+  (e: 'saved'): void
 }>();
 
+const configStore = useConfigStore();
 const ruc = ref('');
+const error = ref('');
+const isVerifying = ref(false);
 
 const handleClose = () => {
-  ruc.value = '';
-  emit('close');
+  if (configStore.isConfigured) {
+    ruc.value = '';
+    error.value = '';
+    emit('close');
+  }
 };
 
-const saveConfig = () => {
-  if (ruc.value) {
-    console.log('RUC guardado:', ruc.value);
+const saveConfig = async () => {
+  if (!ruc.value) return;
+  
+  error.value = '';
+  isVerifying.value = true;
+  
+  try {
+    await verifyRuc(ruc.value);
+    configStore.setRuc(ruc.value);
+    setTenant(ruc.value);
+    emit('saved');
     handleClose();
+  } catch (err: any) {
+    error.value = err.message || 'Error al verificar el RUC';
+  } finally {
+    isVerifying.value = false;
   }
 };
 
@@ -183,22 +210,12 @@ const preventNonNumeric = (event: KeyboardEvent) => {
   height: 2.75rem;
 }
 
-ion-button[color="danger"] {
-  --background: #dc2626;
-  --background-hover: #b91c1c;
+.error-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
 }
 
-ion-button[color="success"] {
-  --background: #22c55e;
-  --background-hover: #16a34a;
-}
-
-ion-button[disabled] {
-  --background: #9ca3af;
-  opacity: 0.7;
-}
-
-/* Estilos para tablets y dispositivos más grandes */
 @media (min-width: 768px) {
   .config-modal::part(content) {
     --max-width: 450px;
@@ -221,3 +238,4 @@ ion-button[disabled] {
   }
 }
 </style>
+

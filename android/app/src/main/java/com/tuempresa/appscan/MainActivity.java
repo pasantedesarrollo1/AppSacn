@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package com.tuempresa.appscan;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -67,6 +67,7 @@
     <product-modal @open="onProductModalOpen"></product-modal>
     <config-modal 
       :is-open="isConfigModalOpen"
+      :is-first-time="isFirstTimeConfig"
       @close="closeConfigModal"
       @saved="onConfigSaved"
     ></config-modal>
@@ -111,6 +112,7 @@ const isConfigModalOpen = ref(false)
 const isAuthModalOpen = ref(false)
 const isConfigMenuOpen = ref(false)
 const isTimeSettingsOpen = ref(false)
+const isFirstTimeConfig = ref(false)
 
 const handleKeyDown = async (event: KeyboardEvent) => {
   // Verificar si el evento proviene de un input en un modal
@@ -171,6 +173,7 @@ const handleConfigClick = (event: Event) => {
   } else {
     // Si no está configurado, abrir directamente el modal de configuración
     isConfigModalOpen.value = true
+    isFirstTimeConfig.value = true
   }
 }
 
@@ -191,6 +194,7 @@ const openConfigModal = () => {
 
 const closeConfigModal = () => {
   isConfigModalOpen.value = false
+  isFirstTimeConfig.value = false
 }
 
 const openConfigMenuModal = () => {
@@ -229,12 +233,14 @@ const onProductModalOpen = () => {
 const onConfigSaved = () => {
   setTenant(configStore.ruc)
   isConfigModalOpen.value = false
+  isFirstTimeConfig.value = false
 }
 
 onMounted(() => {
   // Si no está configurado, mostrar directamente el modal de configuración
   if (!configStore.isConfigured) {
     isConfigModalOpen.value = true
+    isFirstTimeConfig.value = true
   } else {
     setTenant(configStore.ruc)
   }

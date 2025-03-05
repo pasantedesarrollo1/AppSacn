@@ -39,10 +39,10 @@
               color="danger"
               class="action-button"
               @click="handleClose"
-              :disabled="!configStore.isConfigured"
+              :disabled="!configStore.isConfigured && !isFirstTime"
               type="button"
             >
-              CERRAR
+              {{ isFirstTime ? 'SALIR' : 'CERRAR' }}
             </ion-button>
 
             <ion-button
@@ -137,9 +137,11 @@ import { IonModal, IonButton, IonInput, IonSpinner, IonIcon } from '@ionic/vue';
 import { useConfigStore } from '@/stores/configStore';
 import { verifyRuc, setTenant } from '@/services/api';
 import { checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons';
+import { App } from '@capacitor/app';
 
 const props = defineProps<{
-  isOpen: boolean
+  isOpen: boolean,
+  isFirstTime: boolean
 }>();
 
 const emit = defineEmits<{
@@ -157,8 +159,11 @@ const showSuccessModal = ref(false);
 const errorMessage = ref('');
 const rucInfo = ref({ ruc: '', name: '' });
 
-const handleClose = () => {
-  if (configStore.isConfigured) {
+const handleClose = async () => {
+  if (props.isFirstTime && !configStore.isConfigured) {
+    // Solo cerramos la aplicación si es la primera vez y aún no se ha configurado
+    await App.exitApp();
+  } else {
     ruc.value = '';
     error.value = '';
     emit('close');
@@ -199,7 +204,7 @@ const saveConfig = () => {
   setTimeout(() => {
     showSuccessModal.value = false;
     emit('saved');
-    handleClose();
+    // Ya no llamamos a handleClose() aquí
   }, 3000);
 };
 
@@ -457,4 +462,3 @@ const preventNonNumeric = (event: KeyboardEvent) => {
   }
 }
 </style>
-

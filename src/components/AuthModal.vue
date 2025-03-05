@@ -9,61 +9,64 @@
       </div>
       
       <div class="auth-content">
-        <div class="input-group">
-          <div class="relative w-full">
-            <input
-              v-model="code"
-              :type="showPassword ? 'text' : 'password'"
-              placeholder="Ingrese el código de acceso"
-              class="w-full px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base pr-10"
-              @input="handleInput"
-              autocomplete="off"
-            />
-            <button 
-              v-if="code"
-              @click="togglePasswordVisibility"
-              class="absolute right-2 top-1/2 transform -translate-y-1/2 p-1.5 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors rounded-full hover:bg-gray-100"
-              type="button"
-              tabindex="-1"
-            >
-              <ion-icon 
-                :icon="showPassword ? eyeOffOutline : eyeOutline" 
-                class="text-xl block"
-                aria-hidden="true"
-              ></ion-icon>
-              <span class="sr-only">
-                {{ showPassword ? 'Ocultar código' : 'Mostrar código' }}
-              </span>
-            </button>
+        <form @submit.prevent="validateCode">
+          <div class="input-group">
+            <div class="relative w-full">
+              <input
+                v-model="code"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Ingrese el código de acceso"
+                class="w-full px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base pr-10"
+                @input="handleInput"
+                autocomplete="off"
+              />
+              <button 
+                v-if="code"
+                @click="togglePasswordVisibility"
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 p-1.5 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors rounded-full hover:bg-gray-100"
+                type="button"
+                tabindex="-1"
+              >
+                <ion-icon 
+                  :icon="showPassword ? eyeOffOutline : eyeOutline" 
+                  class="text-xl block"
+                  aria-hidden="true"
+                ></ion-icon>
+                <span class="sr-only">
+                  {{ showPassword ? 'Ocultar código' : 'Mostrar código' }}
+                </span>
+              </button>
+            </div>
           </div>
-        </div>
-        
-        <div class="auth-message" v-if="errorMessage">
-          {{ errorMessage }}
-        </div>
-        
-        <div class="auth-buttons">
-          <ion-button
-            expand="block"
-            color="danger"
-            class="auth-button exit-button"
-            @click="exitApp"
-          >
-            <ion-icon :icon="closeCircleOutline" slot="start"></ion-icon>
-            Salir
-          </ion-button>
           
-          <ion-button
-            expand="block"
-            color="success"
-            class="auth-button accept-button"
-            :disabled="!code"
-            @click="validateCode"
-          >
-            <ion-icon :icon="checkmarkCircleOutline" slot="start"></ion-icon>
-            Aceptar
-          </ion-button>
-        </div>
+          <div class="auth-message" v-if="errorMessage">
+            {{ errorMessage }}
+          </div>
+          
+          <div class="auth-buttons">
+            <ion-button
+              expand="block"
+              color="danger"
+              class="auth-button exit-button"
+              @click="exitApp"
+              type="button"
+            >
+              <ion-icon :icon="closeCircleOutline" slot="start"></ion-icon>
+              Salir
+            </ion-button>
+            
+            <ion-button
+              expand="block"
+              color="success"
+              class="auth-button accept-button"
+              :disabled="!code"
+              type="submit"
+            >
+              <ion-icon :icon="checkmarkCircleOutline" slot="start"></ion-icon>
+              Aceptar
+            </ion-button>
+          </div>
+        </form>
       </div>
     </div>
   </ion-modal>
@@ -180,6 +183,7 @@ watch(() => props.isOpen, (newValue) => {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
 .auth-message {
@@ -187,6 +191,7 @@ watch(() => props.isOpen, (newValue) => {
   font-size: 0.875rem;
   text-align: center;
   animation: shake 0.5s ease-in-out;
+  margin-bottom: 1.25rem;
 }
 
 .auth-buttons {
@@ -246,3 +251,4 @@ input::-ms-clear {
   display: none;
 }
 </style>
+

@@ -2,10 +2,19 @@
   <ion-modal :is-open="scanStore.isModalOpen" class="product-modal">
     <div class="h-screen w-full bg-gradient-to-br from-blue-100 via-white to-yellow-100 p-4 flex flex-col font-sans">
       <!-- Barra superior con el nombre del producto o mensaje de error -->
-      <div class="bg-blue-600 text-white py-2 px-4 rounded-lg shadow-lg mb-4">
-        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-center tracking-wide">
+      <div class="bg-blue-600 text-white py-2 px-4 rounded-lg shadow-lg mb-4 flex justify-between items-center">
+        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-center tracking-wide flex-grow">
           {{ error ? 'Producto No Encontrado' : (product?.name || 'Cargando...') }}
         </h1>
+        <!-- Botón Stop temporal -->
+        <ion-button 
+          color="light" 
+          size="small" 
+          class="stop-button"
+          @click="handleStopButton"
+        >
+          {{ autoCloseDisabled ? 'Cerrar' : 'Stop' }}
+        </ion-button>
       </div>
 
       <div class="flex flex-1 w-full max-w-5xl mx-auto bg-white rounded-2xl overflow-hidden shadow-2xl">
@@ -118,7 +127,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { IonModal, IonSpinner, IonIcon } from '@ionic/vue'
+import { IonModal, IonSpinner, IonIcon, IonButton } from '@ionic/vue'
 import { alertCircleOutline, pricetagOutline, pricetagsOutline, timeOutline } from 'ionicons/icons'
 import { useScanStore } from '@/stores/scanStore'
 import { useProductQuery } from '@/hooks/useProductQuery'
@@ -131,6 +140,8 @@ const emit = defineEmits(['open'])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const product = ref<any>(null)
+// Estado para controlar si el cierre automático está deshabilitado
+const autoCloseDisabled = ref(false)
 
 const productImage = computed(() => {
   if (product.value && product.value.images && product.value.images.length > 0) {
@@ -277,12 +288,30 @@ const formatDiscountDescription = (discount: Discount) => {
   }
 };
 
+// Función para manejar el botón Stop
+const handleStopButton = () => {
+  if (autoCloseDisabled.value) {
+    // Si ya está deshabilitado, cerrar el modal
+    scanStore.closeModal();
+    autoCloseDisabled.value = false;
+  } else {
+    // Si no está deshabilitado, deshabilitar el cierre automático
+    autoCloseDisabled.value = true;
+    // Cancelar el temporizador actual si existe
+    if (scanStore.modalTimer) {
+      clearTimeout(scanStore.modalTimer);
+      scanStore.modalTimer = null;
+    }
+  }
+};
+
 watch(() => scanStore.currentProductCode, async (newCode) => {
   if (newCode) {
     console.log('Nuevo código escaneado:', newCode)
     isLoading.value = true
     error.value = null
     product.value = null
+    autoCloseDisabled.value = false // Resetear el estado del botón Stop
     try {
       const result = await fetchProduct(newCode)
       product.value = result
@@ -294,7 +323,10 @@ watch(() => scanStore.currentProductCode, async (newCode) => {
     } finally {
       isLoading.value = false
     }
-    scanStore.resetModalTimer()
+    // Solo reiniciar el temporizador si el cierre automático no está deshabilitado
+    if (!autoCloseDisabled.value) {
+      scanStore.resetModalTimer()
+    }
   }
 })
 
@@ -307,6 +339,7 @@ watch(() => scanStore.isModalOpen, (isOpen) => {
       product.value = null
       error.value = null
       isLoading.value = false
+      autoCloseDisabled.value = false // Resetear el estado del botón Stop
     }, 300)
   }
 })
@@ -325,6 +358,15 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   --background: transparent;
+}
+
+.stop-button {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 6px;
+  --padding-bottom: 6px;
+  --border-radius: 8px;
+  font-weight: bold;
 }
 
 @keyframes fadeIn {
@@ -365,3 +407,4 @@ onUnmounted(() => {
     0 12px 32px -4px rgba(0, 0, 0, 0.1);
 }
 </style>
+

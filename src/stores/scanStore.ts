@@ -1,10 +1,10 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { defineStore } from "pinia"
+import { ref } from "vue"
 
-export const useScanStore = defineStore('scan', () => {
-  const scanBuffer = ref('')
+export const useScanStore = defineStore("scan", () => {
+  const scanBuffer = ref("")
   const isModalOpen = ref(false)
-  const currentProductCode = ref('')
+  const currentProductCode = ref("")
   const lastScanTime = ref(0)
   const SCAN_TIMEOUT = 100 // Ajustable según la velocidad del escáner
   const modalTimer = ref<number | null>(null)
@@ -12,14 +12,14 @@ export const useScanStore = defineStore('scan', () => {
   function addToBuffer(char: string) {
     const now = Date.now()
     if (now - lastScanTime.value > SCAN_TIMEOUT) {
-      scanBuffer.value = ''
+      scanBuffer.value = ""
     }
     scanBuffer.value += char
     lastScanTime.value = now
   }
 
   function clearBuffer() {
-    scanBuffer.value = ''
+    scanBuffer.value = ""
     lastScanTime.value = 0
   }
 
@@ -31,17 +31,17 @@ export const useScanStore = defineStore('scan', () => {
     currentProductCode.value = code
     isModalOpen.value = true
     resetModalTimer()
-    console.log('Modal abierto con código:', code)
+    console.log("Modal abierto con código:", code)
   }
 
   function closeModal() {
     isModalOpen.value = false
-    currentProductCode.value = ''
+    currentProductCode.value = ""
     if (modalTimer.value) {
       clearTimeout(modalTimer.value)
       modalTimer.value = null
     }
-    console.log('Modal cerrado')
+    console.log("Modal cerrado")
   }
 
   function resetModalTimer() {
@@ -49,17 +49,19 @@ export const useScanStore = defineStore('scan', () => {
       clearTimeout(modalTimer.value)
     }
     modalTimer.value = setTimeout(closeModal, 5000) // Cierra el modal después de 5 segundos
-    console.log('Temporizador del modal reiniciado');
+    console.log("Temporizador del modal reiniciado")
   }
 
   return {
     isModalOpen,
     currentProductCode,
+    modalTimer, // Exportamos modalTimer para poder acceder a él desde el componente
     addToBuffer,
     clearBuffer,
     getBuffer,
     openModal,
     closeModal,
-    resetModalTimer
+    resetModalTimer,
   }
 })
+

@@ -13,47 +13,50 @@
       </div>
 
       <div class="modal-content">
-        <div class="input-group">
-          <div class="label-container">
-            Ingrese su RUC
+        <form @submit.prevent="consultarRuc">
+          <div class="input-group">
+            <div class="label-container">
+              Ingrese su RUC
+            </div>
+            <ion-input
+              v-model="ruc"
+              type="text"
+              inputmode="numeric"
+              placeholder="Ej.: 1272637289001"
+              class="ruc-input"
+              @ionInput="validateInput"
+              @keydown="preventNonNumeric"
+            ></ion-input>
+            
+            <div v-if="error" class="error-message">
+              {{ error }}
+            </div>
           </div>
-          <ion-input
-            v-model="ruc"
-            type="text"
-            inputmode="numeric"
-            placeholder="Ej.: 1272637289001"
-            class="ruc-input"
-            @ionInput="validateInput"
-            @keydown="preventNonNumeric"
-          ></ion-input>
-          
-          <div v-if="error" class="error-message">
-            {{ error }}
+
+          <div class="button-group">
+            <ion-button
+              expand="block"
+              color="danger"
+              class="action-button"
+              @click="handleClose"
+              :disabled="!configStore.isConfigured"
+              type="button"
+            >
+              CERRAR
+            </ion-button>
+
+            <ion-button
+              expand="block"
+              color="primary"
+              class="action-button"
+              :disabled="!ruc || isVerifying"
+              type="submit"
+            >
+              <ion-spinner v-if="isVerifying" name="crescent"></ion-spinner>
+              <span v-else>CONSULTAR</span>
+            </ion-button>
           </div>
-        </div>
-
-        <div class="button-group">
-          <ion-button
-            expand="block"
-            color="danger"
-            class="action-button"
-            @click="handleClose"
-            :disabled="!configStore.isConfigured"
-          >
-            CERRAR
-          </ion-button>
-
-          <ion-button
-            expand="block"
-            color="primary"
-            class="action-button"
-            :disabled="!ruc || isVerifying"
-            @click="consultarRuc"
-          >
-            <ion-spinner v-if="isVerifying" name="crescent"></ion-spinner>
-            <span v-else>CONSULTAR</span>
-          </ion-button>
-        </div>
+        </form>
       </div>
     </div>
   </ion-modal>
@@ -276,6 +279,7 @@ const preventNonNumeric = (event: KeyboardEvent) => {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
 .label-container {
@@ -453,3 +457,4 @@ const preventNonNumeric = (event: KeyboardEvent) => {
   }
 }
 </style>
+

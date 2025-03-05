@@ -98,6 +98,34 @@ const isConfigModalOpen = ref(false)
 const isAuthModalOpen = ref(false)
 
 const handleKeyDown = async (event: KeyboardEvent) => {
+  // Verificar si el evento proviene de un input en un modal
+  const target = event.target as HTMLElement
+  const isInputElement = target.tagName === 'INPUT' || target.tagName === 'ION-INPUT'
+  
+  // Si es la tecla Enter y proviene de un input en un modal, manejar de forma especial
+  if (event.key === 'Enter' && isInputElement) {
+    // Verificar si estamos en el modal de autenticación
+    if (isAuthModalOpen.value) {
+      event.preventDefault()
+      // Simular clic en el botón Aceptar del AuthModal
+      document.querySelector('.auth-modal .accept-button')?.dispatchEvent(
+        new MouseEvent('click', { bubbles: true })
+      )
+      return
+    }
+    
+    // Verificar si estamos en el modal de configuración
+    if (isConfigModalOpen.value) {
+      event.preventDefault()
+      // Simular clic en el botón Consultar del ConfigModal
+      document.querySelector('.config-modal .action-button[color="primary"]')?.dispatchEvent(
+        new MouseEvent('click', { bubbles: true })
+      )
+      return
+    }
+  }
+  
+  // Si no es un input en un modal o no es la tecla Enter, procesar normalmente
   if (event.key === 'Enter') {
     event.preventDefault()
     const code = scanStore.getBuffer()
@@ -183,3 +211,4 @@ onUnmounted(() => {
   object-fit: contain;
 }
 </style>
+

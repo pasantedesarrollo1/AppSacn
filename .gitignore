@@ -30,3 +30,7 @@ npm-debug.log*
 /platforms
 /plugins
 /www
+
+# Ignorar las devtools de Vue Query
+/node_modules/@tanstack/vue-query-devtools
+

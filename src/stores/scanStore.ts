@@ -3,9 +3,11 @@ import { ref } from 'vue'
 
 export const useScanStore = defineStore('scan', () => {
   const scanBuffer = ref('')
-  const isProcessing = ref(false)
+  const isModalOpen = ref(false)
+  const currentProductCode = ref('')
   const lastScanTime = ref(0)
   const SCAN_TIMEOUT = 100 // Ajustable según la velocidad del escáner
+  const modalTimer = ref<number | null>(null)
 
   function addToBuffer(char: string) {
     const now = Date.now()
@@ -18,23 +20,46 @@ export const useScanStore = defineStore('scan', () => {
 
   function clearBuffer() {
     scanBuffer.value = ''
-    isProcessing.value = false
     lastScanTime.value = 0
-  }
-
-  function setProcessing(value: boolean) {
-    isProcessing.value = value
   }
 
   function getBuffer() {
     return scanBuffer.value
   }
 
+  function openModal(code: string) {
+    currentProductCode.value = code
+    isModalOpen.value = true
+    resetModalTimer()
+    console.log('Modal abierto con código:', code)
+  }
+
+  function closeModal() {
+    isModalOpen.value = false
+    currentProductCode.value = ''
+    if (modalTimer.value) {
+      clearTimeout(modalTimer.value)
+      modalTimer.value = null
+    }
+    console.log('Modal cerrado')
+  }
+
+  function resetModalTimer() {
+    if (modalTimer.value) {
+      clearTimeout(modalTimer.value)
+    }
+    modalTimer.value = setTimeout(closeModal, 5000) // Cierra el modal después de 5 segundos
+    console.log('Temporizador del modal reiniciado');
+  }
+
   return {
-    isProcessing,
+    isModalOpen,
+    currentProductCode,
     addToBuffer,
     clearBuffer,
-    setProcessing,
-    getBuffer
+    getBuffer,
+    openModal,
+    closeModal,
+    resetModalTimer
   }
 })

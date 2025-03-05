@@ -1,8 +1,5 @@
 <template>
   <ion-app>
-    <!-- Pantalla de bienvenida -->
-    <splash-screen v-if="authStore.showSplashScreen" @complete="onSplashComplete" />
-    
     <!-- Modal de autenticación -->
     <auth-modal 
       :is-open="authStore.showAuthModal" 
@@ -19,15 +16,10 @@
 import { onMounted } from 'vue';
 import { IonApp, IonRouterOutlet } from '@ionic/vue';
 import { useAuthStore } from './stores/authStore';
-import SplashScreen from './components/SplashScreen.vue';
 import AuthModal from './components/AuthModal.vue';
+import { SplashScreen } from '@capacitor/splash-screen';
 
 const authStore = useAuthStore();
-
-// Función para manejar cuando la pantalla de bienvenida termina
-const onSplashComplete = () => {
-  authStore.setSplashScreenShown();
-};
 
 // Función para manejar la autenticación exitosa
 const onAuthenticated = () => {
@@ -44,13 +36,21 @@ const exitApp = () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   // Asegurarse de que el usuario no esté autenticado al iniciar la app
   authStore.setAuthenticated(false);
   
-  // Si no es la primera vez que se abre la app, saltamos el SplashScreen
-  if (!authStore.isFirstOpen) {
-    authStore.setSplashScreenShown();
+  try {
+    // Ocultar el splash screen nativo después de un tiempo
+    setTimeout(async () => {
+      await SplashScreen.hide();
+      // Mostrar el modal de autenticación después de ocultar el splash screen
+      authStore.setAuthModalShown(true);
+    }, 3000); // 3 segundos de duración para el splash screen
+  } catch (error) {
+    console.error('Error al manejar el SplashScreen:', error);
+    // Fallback en caso de error
+    authStore.setAuthModalShown(true);
   }
 });
 </script>

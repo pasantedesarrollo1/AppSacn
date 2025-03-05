@@ -4,7 +4,7 @@
       <ion-toolbar class="bg-white/80 backdrop-blur-sm shadow-sm px-3 py-1">
         <div slot="start" class="rounded-xl overflow-hidden flex-shrink-0">
           <img 
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/icon-AIeF9eqkpixXd01gW0AfihCSEF9lSy.png" 
+            src="../assets/icon.png" 
             alt="Logo" 
             class="w-12 h-12 object-contain"
           />
@@ -32,7 +32,7 @@
             <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000 animate-pulse"></div>
             <div class="relative bg-black rounded-2xl shadow-xl overflow-hidden" style="height: calc(100vh - 180px);">
               <img 
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/download-8CUxOayMLOY1Gg5LhbGkE0e1Ay0Akb.gif" 
+                src="../assets/download.gif" 
                 alt="Dispositivos" 
                 class="w-full h-full object-contain"
               />

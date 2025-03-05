@@ -4,6 +4,7 @@ import { IonicVue } from '@ionic/vue'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import App from './App.vue'
 import router from './router'
+import { SplashScreen } from '@capacitor/splash-screen'
 
 import '@ionic/vue/css/core.css'
 import '@ionic/vue/css/normalize.css'
@@ -17,6 +18,12 @@ import '@ionic/vue/css/flex-utils.css'
 import '@ionic/vue/css/display.css'
 import './assets/main.css'
 
+// Initialize the splash screen
+SplashScreen.show({
+  showDuration: 3000,
+  autoHide: true
+});
+
 const pinia = createPinia()
 const app = createApp(App)
   .use(IonicVue)
@@ -26,7 +33,7 @@ const app = createApp(App)
     queryClientConfig: {
       defaultOptions: {
         queries: {
-          staleTime: 1000 * 60 * 1, // 5 minutos
+          staleTime: 1000 * 60 * 5, // 5 minutos
         },
       },
     },

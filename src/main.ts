@@ -26,7 +26,7 @@ const app = createApp(App)
     queryClientConfig: {
       defaultOptions: {
         queries: {
-          staleTime: 1000 * 60 * 5, // 5 minutos
+          staleTime: 1000 * 60 * 1, // 5 minutos
         },
       },
     },

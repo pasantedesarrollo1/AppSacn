@@ -15,7 +15,7 @@ export function useProductQuery() {
       return getProductDetails(scanStore.currentProductCode)
     },
     enabled: computed(() => !!scanStore.currentProductCode),
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 1, // 5 minutos
     retry: false, // No reintentar en caso de error
     onError: (error: Error) => {
       console.error("Error en la consulta:", error)

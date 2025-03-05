@@ -52,7 +52,7 @@
               type="button"
             >
               <ion-icon :icon="closeCircleOutline" slot="start"></ion-icon>
-              Salir
+              Cerrar
             </ion-button>
             
             <ion-button
@@ -63,7 +63,7 @@
               type="submit"
             >
               <ion-icon :icon="checkmarkCircleOutline" slot="start"></ion-icon>
-              Aceptar
+              Ingresar
             </ion-button>
           </div>
         </form>

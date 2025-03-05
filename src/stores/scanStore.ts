@@ -8,6 +8,7 @@ export const useScanStore = defineStore("scan", () => {
   const lastScanTime = ref(0)
   const SCAN_TIMEOUT = 100 // Ajustable según la velocidad del escáner
   const modalTimer = ref<number | null>(null)
+  const modalTimeout = ref(parseInt(localStorage.getItem('product_display_time') || '5', 10) * 1000)
 
   function addToBuffer(char: string) {
     const now = Date.now()
@@ -48,20 +49,26 @@ export const useScanStore = defineStore("scan", () => {
     if (modalTimer.value) {
       clearTimeout(modalTimer.value)
     }
-    modalTimer.value = setTimeout(closeModal, 5000) // Cierra el modal después de 5 segundos
-    console.log("Temporizador del modal reiniciado")
+    modalTimer.value = setTimeout(closeModal, modalTimeout.value) // Usa el tiempo configurable
+    console.log(`Temporizador del modal reiniciado con ${modalTimeout.value/1000} segundos`)
+  }
+
+  function setModalTimeout(timeout: number) {
+    modalTimeout.value = timeout
+    console.log(`Tiempo del modal establecido a ${timeout/1000} segundos`)
   }
 
   return {
     isModalOpen,
     currentProductCode,
-    modalTimer, // Exportamos modalTimer para poder acceder a él desde el componente
+    modalTimer,
+    modalTimeout,
     addToBuffer,
     clearBuffer,
     getBuffer,
     openModal,
     closeModal,
     resetModalTimer,
+    setModalTimeout,
   }
 })
-

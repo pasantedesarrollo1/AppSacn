@@ -1,130 +1,3 @@
-<template>
-  <ion-modal :is-open="scanStore.isModalOpen" class="product-modal">
-    <div class="h-screen w-full bg-gradient-to-br from-blue-100 via-white to-yellow-100 p-4 flex flex-col font-sans">
-      <!-- Barra superior con el nombre del producto o mensaje de error -->
-      <div class="bg-blue-600 text-white py-2 px-4 rounded-lg shadow-lg mb-4 flex justify-between items-center">
-        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-center tracking-wide flex-grow">
-          {{ error ? 'Producto No Encontrado' : (product?.name || 'Cargando...') }}
-        </h1>
-        <!-- Botón Stop temporal -->
-        <ion-button 
-          color="light" 
-          size="small" 
-          class="stop-button"
-          @click="handleStopButton"
-        >
-          {{ autoCloseDisabled ? 'Cerrar' : 'Stop' }}
-        </ion-button>
-      </div>
-
-      <div class="flex flex-1 w-full max-w-5xl mx-auto bg-white rounded-2xl overflow-hidden shadow-2xl">
-        <!-- Estado de carga -->
-        <div v-if="isLoading" class="w-full flex flex-col items-center justify-center p-8 space-y-4">
-          <div class="w-16 h-16">
-            <ion-spinner name="crescent" class="text-blue-600 w-full h-full"></ion-spinner>
-          </div>
-          <p class="text-xl font-medium text-gray-600 animate-pulse">Cargando información del producto...</p>
-        </div>
-
-        <!-- Estado de error -->
-        <div v-else-if="error" class="w-full h-full flex flex-col relative">
-          <!-- Contenido principal centrado -->
-          <div class="flex-1 flex flex-col items-center justify-center p-8">
-            <div class="relative w-32 h-32 mb-4">
-              <img 
-                src="../assets/no-disponible.png"
-                alt="Producto no disponible"
-                class="w-full h-full object-contain"
-              />
-            </div>
-            <div class="text-center space-y-3">
-              <h2 class="text-2xl font-bold text-gray-800 font-sans">
-                Producto No Disponible
-              </h2>
-              <p class="text-gray-600 max-w-md mx-auto font-medium">
-                Lo sentimos, el producto que estás buscando no se encuentra disponible en este momento.
-              </p>
-            </div>
-          </div>
-          
-          <!-- Componente de escaneo en la parte inferior -->
-          <div class="w-full pb-8">
-            <div class="w-full max-w-md mx-auto">
-              <div class="bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)] 
-                          transition-all duration-300">
-                <div class="flex items-center justify-center gap-3 px-6 py-3">
-                  <div class="bg-blue-900 p-2 rounded-full flex-shrink-0">
-                    <img 
-                      src="../assets/codescan.png"
-                      alt="Escáner"
-                      class="w-8 h-8"
-                    />
-                  </div>
-                  <span class="text-blue-900 font-medium text-center flex-grow">
-                    Acerque un producto al escáner
-                  </span>
-                </div>
-              </div>
-              <!-- Puntos decorativos -->
-              <div class="flex justify-center space-x-2 mt-3">
-                <div class="w-2 h-2 rounded-full bg-blue-400 animate-bounce" style="animation-delay: 0ms"></div>
-                <div class="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style="animation-delay: 150ms"></div>
-                <div class="w-2 h-2 rounded-full bg-blue-600 animate-bounce" style="animation-delay: 300ms"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Contenido normal del producto -->
-        <template v-else>
-          <div class="w-1/2 relative bg-gradient-to-br from-blue-50 to-white border-r border-gray-200">
-            <img
-              v-if="product"
-              :src="productImage"
-              :alt="product?.name"
-              class="absolute inset-0 w-full h-full object-contain p-4"
-            />
-          </div>
-
-          <div class="w-1/2 flex flex-col justify-between p-6 bg-gradient-to-br from-white to-blue-50">
-            <div class="space-y-6" v-if="product">
-              <h2 class="text-3xl font-bold text-blue-800 pb-2 border-b-2 border-blue-200">
-                Promociones Especiales
-              </h2>
-              
-              <div v-for="discount in bestDiscounts" :key="discount.id" class="bg-gradient-to-r from-blue-500 to-blue-600 p-5 rounded-lg text-white shadow-lg mb-4">
-                <div class="flex items-center justify-between">
-                  <div class="space-y-2">
-                    <span class="text-5xl font-extrabold tracking-tight">
-                      ${{ applyDiscount(product.price, discount).toFixed(2) }}
-                    </span>
-                    <div class="flex items-center">
-                      <span class="text-xl text-blue-200 line-through mr-3 font-light">
-                        ${{ product.price.toFixed(2) }}
-                      </span>
-                      <div class="bg-yellow-400 text-blue-800 px-3 py-1 rounded-full flex items-center">
-                        <ion-icon :icon="pricetagOutline" class="w-4 h-4 mr-1"></ion-icon>
-                        <span class="font-bold text-sm">{{ formatDiscountLabel(discount) }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="bg-white text-blue-600 p-3 rounded-full">
-                    <ion-icon :icon="pricetagsOutline" class="w-10 h-10"></ion-icon>
-                  </div>
-                </div>
-                <div class="mt-4 text-sm">
-                  <p class="font-semibold">{{ discount.name }}</p>
-                  <p>{{ formatDiscountDescription(discount) }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </template>
-      </div>
-    </div>
-  </ion-modal>
-</template>
-
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { IonModal, IonSpinner, IonIcon, IonButton } from '@ionic/vue'
@@ -142,6 +15,10 @@ const error = ref<string | null>(null)
 const product = ref<any>(null)
 // Estado para controlar si el cierre automático está deshabilitado
 const autoCloseDisabled = ref(false)
+
+// Tiempo restante para mostrar en el botón Stop
+const remainingTime = ref(0)
+const timerInterval = ref<number | null>(null)
 
 const productImage = computed(() => {
   if (product.value && product.value.images && product.value.images.length > 0) {
@@ -294,6 +171,10 @@ const handleStopButton = () => {
     // Si ya está deshabilitado, cerrar el modal
     scanStore.closeModal();
     autoCloseDisabled.value = false;
+    if (timerInterval.value) {
+      clearInterval(timerInterval.value);
+      timerInterval.value = null;
+    }
   } else {
     // Si no está deshabilitado, deshabilitar el cierre automático
     autoCloseDisabled.value = true;
@@ -302,7 +183,34 @@ const handleStopButton = () => {
       clearTimeout(scanStore.modalTimer);
       scanStore.modalTimer = null;
     }
+    if (timerInterval.value) {
+      clearInterval(timerInterval.value);
+      timerInterval.value = null;
+    }
   }
+};
+
+// Función para iniciar el contador de tiempo restante
+const startRemainingTimeCounter = () => {
+  // Establecer el tiempo inicial
+  remainingTime.value = Math.floor(scanStore.modalTimeout / 1000);
+  
+  // Limpiar cualquier intervalo existente
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value);
+  }
+  
+  // Iniciar un nuevo intervalo
+  timerInterval.value = setInterval(() => {
+    if (remainingTime.value > 0) {
+      remainingTime.value--;
+    } else {
+      if (timerInterval.value) {
+        clearInterval(timerInterval.value);
+        timerInterval.value = null;
+      }
+    }
+  }, 1000);
 };
 
 watch(() => scanStore.currentProductCode, async (newCode) => {
@@ -326,6 +234,7 @@ watch(() => scanStore.currentProductCode, async (newCode) => {
     // Solo reiniciar el temporizador si el cierre automático no está deshabilitado
     if (!autoCloseDisabled.value) {
       scanStore.resetModalTimer()
+      startRemainingTimeCounter()
     }
   }
 })
@@ -333,6 +242,9 @@ watch(() => scanStore.currentProductCode, async (newCode) => {
 watch(() => scanStore.isModalOpen, (isOpen) => {
   if (isOpen) {
     emit('open')
+    if (!autoCloseDisabled.value) {
+      startRemainingTimeCounter()
+    }
   }
   if (!isOpen) {
     setTimeout(() => {
@@ -340,6 +252,10 @@ watch(() => scanStore.isModalOpen, (isOpen) => {
       error.value = null
       isLoading.value = false
       autoCloseDisabled.value = false // Resetear el estado del botón Stop
+      if (timerInterval.value) {
+        clearInterval(timerInterval.value)
+        timerInterval.value = null
+      }
     }, 300)
   }
 })
@@ -350,8 +266,138 @@ onMounted(() => {
 
 onUnmounted(() => {
   console.log('ProductModal desmontado')
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value)
+  }
 })
 </script>
+
+<template>
+  <ion-modal :is-open="scanStore.isModalOpen" class="product-modal">
+    <div class="h-screen w-full bg-gradient-to-br from-blue-100 via-white to-yellow-100 p-4 flex flex-col font-sans">
+      <!-- Barra superior con el nombre del producto o mensaje de error -->
+      <div class="bg-blue-600 text-white py-2 px-4 rounded-lg shadow-lg mb-4 flex justify-between items-center">
+        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-center tracking-wide flex-grow">
+          {{ error ? 'Producto No Encontrado' : (product?.name || 'Cargando...') }}
+        </h1>
+        <!-- Botón Stop con contador de tiempo -->
+        <ion-button 
+          color="light" 
+          size="small" 
+          class="stop-button"
+          @click="handleStopButton"
+        >
+          {{ autoCloseDisabled ? 'Cerrar' : `Stop (${remainingTime}s)` }}
+        </ion-button>
+      </div>
+
+      <div class="flex flex-1 w-full max-w-5xl mx-auto bg-white rounded-2xl overflow-hidden shadow-2xl">
+        <!-- Estado de carga -->
+        <div v-if="isLoading" class="w-full flex flex-col items-center justify-center p-8 space-y-4">
+          <div class="w-16 h-16">
+            <ion-spinner name="crescent" class="text-blue-600 w-full h-full"></ion-spinner>
+          </div>
+          <p class="text-xl font-medium text-gray-600 animate-pulse">Cargando información del producto...</p>
+        </div>
+
+        <!-- Estado de error -->
+        <div v-else-if="error" class="w-full h-full flex flex-col relative">
+          <!-- Contenido principal centrado -->
+          <div class="flex-1 flex flex-col items-center justify-center p-8">
+            <div class="relative w-32 h-32 mb-4">
+              <img 
+                src="../assets/no-disponible.png"
+                alt="Producto no disponible"
+                class="w-full h-full object-contain"
+              />
+            </div>
+            <div class="text-center space-y-3">
+              <h2 class="text-2xl font-bold text-gray-800 font-sans">
+                Producto No Disponible
+              </h2>
+              <p class="text-gray-600 max-w-md mx-auto font-medium">
+                Lo sentimos, el producto que estás buscando no se encuentra disponible en este momento.
+              </p>
+            </div>
+          </div>
+          
+          <!-- Componente de escaneo en la parte inferior -->
+          <div class="w-full pb-8">
+            <div class="w-full max-w-md mx-auto">
+              <div class="bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)] 
+                          transition-all duration-300">
+                <div class="flex items-center justify-center gap-3 px-6 py-3">
+                  <div class="bg-blue-900 p-2 rounded-full flex-shrink-0">
+                    <img 
+                      src="../assets/codescan.png"
+                      alt="Escáner"
+                      class="w-8 h-8"
+                    />
+                  </div>
+                  <span class="text-blue-900 font-medium text-center flex-grow">
+                    Acerque un producto al escáner
+                  </span>
+                </div>
+              </div>
+              <!-- Puntos decorativos -->
+              <div class="flex justify-center space-x-2 mt-3">
+                <div class="w-2 h-2 rounded-full bg-blue-400 animate-bounce" style="animation-delay: 0ms"></div>
+                <div class="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style="animation-delay: 150ms"></div>
+                <div class="w-2 h-2 rounded-full bg-blue-600 animate-bounce" style="animation-delay: 300ms"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenido normal del producto -->
+        <template v-else>
+          <div class="w-1/2 relative bg-gradient-to-br from-blue-50 to-white border-r border-gray-200">
+            <img
+              v-if="product"
+              :src="productImage"
+              :alt="product?.name"
+              class="absolute inset-0 w-full h-full object-contain p-4"
+            />
+          </div>
+
+          <div class="w-1/2 flex flex-col justify-between p-6 bg-gradient-to-br from-white to-blue-50">
+            <div class="space-y-6" v-if="product">
+              <h2 class="text-3xl font-bold text-blue-800 pb-2 border-b-2 border-blue-200">
+                Promociones Especiales
+              </h2>
+              
+              <div v-for="discount in bestDiscounts" :key="discount.id" class="bg-gradient-to-r from-blue-500 to-blue-600 p-5 rounded-lg text-white shadow-lg mb-4">
+                <div class="flex items-center justify-between">
+                  <div class="space-y-2">
+                    <span class="text-5xl font-extrabold tracking-tight">
+                      ${{ applyDiscount(product.price, discount).toFixed(2) }}
+                    </span>
+                    <div class="flex items-center">
+                      <span class="text-xl text-blue-200 line-through mr-3 font-light">
+                        ${{ product.price.toFixed(2) }}
+                      </span>
+                      <div class="bg-yellow-400 text-blue-800 px-3 py-1 rounded-full flex items-center">
+                        <ion-icon :icon="pricetagOutline" class="w-4 h-4 mr-1"></ion-icon>
+                        <span class="font-bold text-sm">{{ formatDiscountLabel(discount) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bg-white text-blue-600 p-3 rounded-full">
+                    <ion-icon :icon="pricetagsOutline" class="w-10 h-10"></ion-icon>
+                  </div>
+                </div>
+                <div class="mt-4 text-sm">
+                  <p class="font-semibold">{{ discount.name }}</p>
+                  <p>{{ formatDiscountDescription(discount) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </ion-modal>
+</template>
 
 <style>
 .product-modal::part(content) {
@@ -407,4 +453,3 @@ onUnmounted(() => {
     0 12px 32px -4px rgba(0, 0, 0, 0.1);
 }
 </style>
-

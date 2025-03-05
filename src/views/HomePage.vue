@@ -75,6 +75,17 @@
       @authenticated="onAuthSuccess" 
       @exit="closeAuthModal"
     />
+    <config-menu-modal
+      :is-open="isConfigMenuOpen"
+      @close="closeConfigMenuModal"
+      @open-ruc-settings="openRucSettings"
+      @open-time-settings="openTimeSettings"
+    />
+    <time-settings-modal
+      :is-open="isTimeSettingsOpen"
+      @close="closeTimeSettingsModal"
+      @saved="onTimeSettingsSaved"
+    />
   </ion-page>
 </template>
 
@@ -88,6 +99,8 @@ import { useProductQuery } from '@/hooks/useProductQuery'
 import ProductModal from '@/components/ProductModal.vue'
 import ConfigModal from '@/components/ConfigModal.vue'
 import AuthModal from '@/components/AuthModal.vue'
+import ConfigMenuModal from '@/components/ConfigMenuModal.vue'
+import TimeSettingsModal from '@/components/TimeSettingsModal.vue'
 import { setTenant } from '@/services/api'
 
 const scanStore = useScanStore()
@@ -96,6 +109,8 @@ const authStore = useAuthStore()
 const { fetchProduct } = useProductQuery()
 const isConfigModalOpen = ref(false)
 const isAuthModalOpen = ref(false)
+const isConfigMenuOpen = ref(false)
+const isTimeSettingsOpen = ref(false)
 
 const handleKeyDown = async (event: KeyboardEvent) => {
   // Verificar si el evento proviene de un input en un modal
@@ -162,8 +177,8 @@ const handleConfigClick = (event: Event) => {
 const onAuthSuccess = () => {
   // Cerrar el modal de autenticación
   isAuthModalOpen.value = false
-  // Abrir el modal de configuración
-  isConfigModalOpen.value = true
+  // Abrir el menú de configuración
+  isConfigMenuOpen.value = true
 }
 
 const closeAuthModal = () => {
@@ -176,6 +191,33 @@ const openConfigModal = () => {
 
 const closeConfigModal = () => {
   isConfigModalOpen.value = false
+}
+
+const openConfigMenuModal = () => {
+  isConfigMenuOpen.value = true
+}
+
+const closeConfigMenuModal = () => {
+  isConfigMenuOpen.value = false
+}
+
+const openRucSettings = () => {
+  closeConfigMenuModal()
+  isConfigModalOpen.value = true
+}
+
+const openTimeSettings = () => {
+  closeConfigMenuModal()
+  isTimeSettingsOpen.value = true
+}
+
+const closeTimeSettingsModal = () => {
+  isTimeSettingsOpen.value = false
+}
+
+const onTimeSettingsSaved = () => {
+  // No necesitamos hacer nada aquí, ya que el store se actualiza en el componente
+  console.log('Configuración de tiempo guardada')
 }
 
 const onProductModalOpen = () => {

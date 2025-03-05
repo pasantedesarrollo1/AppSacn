@@ -68,7 +68,6 @@
 
         <!-- Contenido normal del producto -->
         <template v-else>
-          <!-- Contenido existente sin cambios -->
           <div class="w-1/2 relative bg-gradient-to-br from-blue-50 to-white border-r border-gray-200">
             <img
               v-if="product"
@@ -84,25 +83,29 @@
                 Promociones Especiales
               </h2>
               
-              <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-5 rounded-lg text-white shadow-lg">
+              <div v-for="discount in bestDiscounts" :key="discount.id" class="bg-gradient-to-r from-blue-500 to-blue-600 p-5 rounded-lg text-white shadow-lg mb-4">
                 <div class="flex items-center justify-between">
                   <div class="space-y-2">
                     <span class="text-5xl font-extrabold tracking-tight">
-                      ${{ product?.price?.toFixed(2) }}
+                      ${{ applyDiscount(product.price, discount).toFixed(2) }}
                     </span>
                     <div class="flex items-center">
                       <span class="text-xl text-blue-200 line-through mr-3 font-light">
-                        ${{ (product?.price * 1.15)?.toFixed(2) }}
+                        ${{ product.price.toFixed(2) }}
                       </span>
                       <div class="bg-yellow-400 text-blue-800 px-3 py-1 rounded-full flex items-center">
                         <ion-icon :icon="pricetagOutline" class="w-4 h-4 mr-1"></ion-icon>
-                        <span class="font-bold text-sm">15% OFF</span>
+                        <span class="font-bold text-sm">{{ formatDiscountLabel(discount) }}</span>
                       </div>
                     </div>
                   </div>
                   <div class="bg-white text-blue-600 p-3 rounded-full">
                     <ion-icon :icon="pricetagsOutline" class="w-10 h-10"></ion-icon>
                   </div>
+                </div>
+                <div class="mt-4 text-sm">
+                  <p class="font-semibold">{{ discount.name }}</p>
+                  <p>{{ formatDiscountDescription(discount) }}</p>
                 </div>
               </div>
             </div>
@@ -114,12 +117,11 @@
 </template>
 
 <script setup lang="ts">
-// El script setup permanece igual
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { IonModal, IonSpinner, IonIcon } from '@ionic/vue'
 import { alertCircleOutline, pricetagOutline, pricetagsOutline, timeOutline } from 'ionicons/icons'
 import { useScanStore } from '@/stores/scanStore'
 import { useProductQuery } from '@/hooks/useProductQuery'
-import { watch, onMounted, onUnmounted, ref, computed } from 'vue'
 
 const scanStore = useScanStore()
 const { productQuery, fetchProduct, errorMessage } = useProductQuery()
@@ -136,6 +138,144 @@ const productImage = computed(() => {
   }
   return 'https://via.placeholder.com/300'
 })
+
+interface Discount {
+  id: string;
+  name: string;
+  type: 'porcentaje' | 'fijo';
+  quantity: number;
+  discount: number;
+  starting_date: string;
+  ending_date: string;
+  starting_time: string;
+  ending_time: string;
+  weekdays: string[];
+  filter: any;
+  application_method: 'always' | 'from_to' | 'every_to';
+  group: string;
+  active: boolean;
+}
+
+const calculateDiscountValue = (discount: Discount, price: number) => {
+  if (discount.application_method === 'always' || discount.application_method === 'from_to') {
+    if (discount.type === 'fijo') {
+      return discount.discount;
+    } else { // porcentaje
+      return price * discount.discount / 100;
+    }
+  } else if (discount.application_method === 'every_to') {
+    const freeItems = Math.floor(discount.quantity / (discount.quantity + 1));
+    return (price * freeItems) / discount.quantity;
+  }
+  return 0;
+};
+
+const bestDiscounts = computed(() => {
+  if (!product.value || !product.value.all_discounts) return [];
+  
+  const now = new Date('2025-03-04T20:41:00');
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  
+  const timeToMinutes = (timeStr: string) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  // Filtrar descuentos válidos
+  const validDiscounts = product.value.all_discounts.filter((discount: Discount) => {
+    const startDate = new Date(discount.starting_date);
+    const endDate = new Date(discount.ending_date);
+    const isWithinDateRange = now >= startDate && now <= endDate && discount.active;
+    
+    const startMinutes = timeToMinutes(discount.starting_time);
+    const endMinutes = timeToMinutes(discount.ending_time);
+    
+    let isWithinTimeRange;
+    if (endMinutes >= startMinutes) {
+      isWithinTimeRange = currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+    } else {
+      isWithinTimeRange = currentMinutes >= startMinutes || currentMinutes <= endMinutes;
+    }
+
+    const currentDay = now.getDay().toString();
+    const isValidDay = discount.weekdays.includes(currentDay);
+
+    return isWithinDateRange && isWithinTimeRange && isValidDay;
+  });
+
+  // Si hay un descuento 'always', retornarlo inmediatamente
+  const alwaysDiscount = validDiscounts.find(d => d.application_method === 'always');
+  if (alwaysDiscount) {
+    return [alwaysDiscount];
+  }
+
+  // Procesar todos los descuentos 'from_to' y 'every_to'
+  const otherDiscounts = validDiscounts.filter(d => d.application_method === 'from_to' || d.application_method === 'every_to');
+
+  // Calcular el valor del descuento para cada uno
+  const discountsWithValues = otherDiscounts.map(discount => ({
+    discount,
+    value: calculateDiscountValue(discount, product.value.price)
+  }));
+
+  // Agrupar por valor de descuento
+  const groupedDiscounts = discountsWithValues.reduce((acc, { discount, value }) => {
+    if (!acc[value]) {
+      acc[value] = [];
+    }
+    acc[value].push(discount);
+    return acc;
+  }, {} as Record<number, Discount[]>);
+
+  // Seleccionar un descuento de cada grupo de valor único
+  const uniqueDiscounts = Object.values(groupedDiscounts).map(group => group[0]);
+
+  // Ordenar por el valor del descuento (mayor primero)
+  return uniqueDiscounts.sort((a, b) => 
+    calculateDiscountValue(b, product.value.price) - calculateDiscountValue(a, product.value.price)
+  );
+});
+
+const applyDiscount = (price: number, discount: Discount) => {
+  if (discount.application_method === 'always' || discount.application_method === 'from_to') {
+    if (discount.type === 'fijo') {
+      return Math.max(0, price - discount.discount);
+    } else { // porcentaje
+      return price * (1 - discount.discount / 100);
+    }
+  } else if (discount.application_method === 'every_to') {
+    const freeItems = Math.floor(discount.quantity / (discount.quantity + 1));
+    return price * (1 - freeItems / discount.quantity);
+  }
+  return price;
+};
+
+const formatDiscountLabel = (discount: Discount) => {
+  if (discount.application_method === 'every_to') {
+    return `${Math.floor(discount.quantity / (discount.quantity + 1))} GRATIS`;
+  }
+  if (discount.type === 'fijo') {
+    return `$${discount.discount.toFixed(2)} OFF`;
+  } else if (discount.type === 'porcentaje') {
+    return `${discount.discount}% OFF`;
+  }
+  return '';
+};
+
+const formatDiscountDescription = (discount: Discount) => {
+  switch (discount.application_method) {
+    case 'always':
+      return `Descuento aplicado siempre: ${discount.type === 'fijo' ? '$' : ''}${discount.discount}${discount.type === 'porcentaje' ? '%' : ''}`;
+    case 'from_to':
+      return `Por la compra mínima de ${discount.quantity} obten un descuento de ${
+        discount.type === 'fijo' ? `$${discount.discount.toFixed(2)}` : `${discount.discount}%`
+      }`;
+    case 'every_to':
+      return `Por la compra de ${discount.quantity}, llévate ${Math.floor(discount.quantity / (discount.quantity + 1))} gratis`;
+    default:
+      return '';
+  }
+};
 
 watch(() => scanStore.currentProductCode, async (newCode) => {
   if (newCode) {

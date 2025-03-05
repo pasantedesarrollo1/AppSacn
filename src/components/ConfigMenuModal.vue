@@ -10,6 +10,14 @@
             />
             <h2 class="header-title">Menú de Configuración</h2>
           </div>
+          <ion-button 
+            fill="clear" 
+            color="danger" 
+            class="close-button"
+            @click="handleClose"
+          >
+            <ion-icon :icon="closeOutline" />
+          </ion-button>
         </div>
   
         <div class="modal-content">
@@ -33,16 +41,15 @@
               <ion-icon :icon="timeOutline" slot="start"></ion-icon>
               Tiempo del Producto
             </ion-button>
-          </div>
   
-          <div class="button-group">
-            <ion-button
-              expand="block"
-              color="danger"
-              class="action-button"
-              @click="handleClose"
+            <ion-button 
+              expand="block" 
+              color="danger" 
+              class="menu-button"
+              @click="exitApp"
             >
-              CERRAR
+              <ion-icon :icon="powerOutline" slot="start"></ion-icon>
+              Salir de la Aplicación
             </ion-button>
           </div>
         </div>
@@ -52,7 +59,8 @@
   
   <script setup lang="ts">
   import { IonModal, IonButton, IonIcon } from '@ionic/vue';
-  import { cardOutline, timeOutline } from 'ionicons/icons';
+  import { cardOutline, timeOutline, powerOutline, closeOutline } from 'ionicons/icons';
+  import { App } from '@capacitor/app';
   
   const props = defineProps<{
     isOpen: boolean
@@ -75,6 +83,10 @@
   const handleTimeSettings = () => {
     emit('openTimeSettings');
   };
+  
+  const exitApp = async () => {
+    await App.exitApp();
+  };
   </script>
   
   <style scoped>
@@ -95,6 +107,9 @@
   .modal-header {
     padding: 1rem;
     border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   
   .header-content {
@@ -113,6 +128,24 @@
     font-weight: 600;
     color: #1a56db;
     margin: 0;
+  }
+  
+  .close-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    margin: 0;
+    height: auto;
+  }
+  
+  .close-button::part(native) {
+    padding: 0;
+  }
+  
+  .close-button ion-icon {
+    font-size: 24px;
+    color: #dc2626;
   }
   
   .modal-content {
@@ -139,22 +172,6 @@
     --padding-end: 1.5rem;
   }
   
-  .button-group {
-    display: flex;
-    padding: 0 0.5rem;
-    margin-top: 1rem;
-  }
-  
-  .action-button {
-    margin: 0;
-    --border-radius: 8px;
-    flex: 1;
-    font-weight: 600;
-    font-size: 0.95rem;
-    letter-spacing: 0.025em;
-    height: 2.75rem;
-  }
-  
   @media (min-width: 768px) {
     .config-menu-modal::part(content) {
       --max-width: 450px;
@@ -166,10 +183,6 @@
   
     .menu-button {
       font-size: 1.1rem;
-    }
-  
-    .action-button {
-      font-size: 1rem;
     }
   }
   </style>

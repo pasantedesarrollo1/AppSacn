@@ -167,11 +167,9 @@ const handleKeyDown = async (event: KeyboardEvent) => {
 const handleConfigClick = (event: Event) => {
   event.preventDefault()
   event.stopPropagation()
-  // Mostrar el modal de autenticación primero si ya está configurado
   if (configStore.isConfigured) {
     isAuthModalOpen.value = true
   } else {
-    // Si no está configurado, abrir directamente el modal de configuración
     isConfigModalOpen.value = true
     isFirstTimeConfig.value = true
   }
@@ -230,8 +228,8 @@ const onProductModalOpen = () => {
   }
 }
 
-const onConfigSaved = () => {
-  setTenant(configStore.ruc)
+const onConfigSaved = (savedRuc: string) => {
+  setTenant(savedRuc)
   isConfigModalOpen.value = false
   isFirstTimeConfig.value = false
 }

@@ -132,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { IonModal, IonButton, IonInput, IonSpinner, IonIcon } from '@ionic/vue';
 import { useConfigStore } from '@/stores/configStore';
 import { verifyRuc, setTenant } from '@/services/api';
@@ -159,9 +159,14 @@ const showSuccessModal = ref(false);
 const errorMessage = ref('');
 const rucInfo = ref({ ruc: '', name: '' });
 
+watch(() => props.isOpen, (newValue) => {
+  if (newValue) {
+    ruc.value = ''; // Limpiar el input cada vez que se abre el modal
+  }
+});
+
 const handleClose = async () => {
   if (props.isFirstTime && !configStore.isConfigured) {
-    // Solo cerramos la aplicación si es la primera vez y aún no se ha configurado
     await App.exitApp();
   } else {
     ruc.value = '';
@@ -203,8 +208,8 @@ const saveConfig = () => {
   
   setTimeout(() => {
     showSuccessModal.value = false;
-    emit('saved');
-    // Ya no llamamos a handleClose() aquí
+    emit('saved', rucInfo.value.ruc);
+    ruc.value = ''; // Limpiar el input después de guardar
   }, 3000);
 };
 

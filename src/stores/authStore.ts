@@ -1,12 +1,19 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { useConfigStore } from './configStore';
 
 export const useAuthStore = defineStore('auth', () => {
-  const accessCode = '123456';
+  const configStore = useConfigStore();
+  // Eliminamos el código de acceso fijo y usamos una función getter
   const isAuthenticated = ref(true); // Inicialmente autenticado para permitir acceso a la app
-  const isFirstOpen = ref(true);
+  const isFirstOpen = ref(!localStorage.getItem("app_ruc")); // Primera apertura si no hay RUC guardado
   const showSplashScreen = ref(true);
   const showAuthModal = ref(false);
+
+  // Función para obtener el código de acceso (ahora es el RUC)
+  function getAccessCode() {
+    return configStore.ruc;
+  }
 
   function setAuthenticated(value: boolean) {
     isAuthenticated.value = value;
@@ -25,7 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
-    accessCode,
+    getAccessCode, // Reemplazamos accessCode con getAccessCode
     isAuthenticated,
     isFirstOpen,
     showSplashScreen,

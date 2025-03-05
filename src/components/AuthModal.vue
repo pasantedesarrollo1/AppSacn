@@ -105,7 +105,8 @@ const handleInput = (event: Event) => {
 };
 
 const validateCode = () => {
-  if (code.value === authStore.accessCode) {
+  // Usamos getAccessCode en lugar de accessCode
+  if (code.value === authStore.getAccessCode()) {
     authStore.setAuthenticated(true);
     emit('authenticated');
     errorMessage.value = '';

@@ -30,6 +30,7 @@ export const verifyRuc = async (ruc: string) => {
         "X-tenant": ruc,
       },
     })
+    // Devolver los datos específicos que necesitamos
     return response.data.data
   } catch (error) {
     console.error("Error verificando RUC:", error)
@@ -51,4 +52,3 @@ export const setTenant = (ruc: string) => {
 }
 
 export { api }
-

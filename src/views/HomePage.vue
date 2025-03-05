@@ -12,7 +12,7 @@
         
         <ion-buttons slot="end">
           <ion-button 
-            @click="openConfigModal" 
+            @click="handleConfigClick" 
             class="p-1.5 rounded-full hover:bg-blue-100 transition-colors"
           >
             <img 
@@ -70,6 +70,11 @@
       @close="closeConfigModal"
       @saved="onConfigSaved"
     ></config-modal>
+    <auth-modal 
+      :is-open="isAuthModalOpen" 
+      @authenticated="onAuthSuccess" 
+      @exit="closeAuthModal"
+    />
   </ion-page>
 </template>
 
@@ -78,15 +83,19 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { IonPage, IonContent, IonHeader, IonToolbar, IonButton, IonButtons } from '@ionic/vue'
 import { useScanStore } from '@/stores/scanStore'
 import { useConfigStore } from '@/stores/configStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useProductQuery } from '@/hooks/useProductQuery'
 import ProductModal from '@/components/ProductModal.vue'
 import ConfigModal from '@/components/ConfigModal.vue'
+import AuthModal from '@/components/AuthModal.vue'
 import { setTenant } from '@/services/api'
 
 const scanStore = useScanStore()
 const configStore = useConfigStore()
+const authStore = useAuthStore()
 const { fetchProduct } = useProductQuery()
 const isConfigModalOpen = ref(false)
+const isAuthModalOpen = ref(false)
 
 const handleKeyDown = async (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
@@ -110,9 +119,25 @@ const handleKeyDown = async (event: KeyboardEvent) => {
   }
 }
 
-const openConfigModal = (event: Event) => {
+const handleConfigClick = (event: Event) => {
   event.preventDefault()
   event.stopPropagation()
+  // Mostrar el modal de autenticación primero
+  isAuthModalOpen.value = true
+}
+
+const onAuthSuccess = () => {
+  // Cerrar el modal de autenticación
+  isAuthModalOpen.value = false
+  // Abrir el modal de configuración
+  isConfigModalOpen.value = true
+}
+
+const closeAuthModal = () => {
+  isAuthModalOpen.value = false
+}
+
+const openConfigModal = () => {
   isConfigModalOpen.value = true
 }
 
@@ -133,7 +158,8 @@ const onConfigSaved = () => {
 
 onMounted(() => {
   if (!configStore.isConfigured) {
-    isConfigModalOpen.value = true
+    // Primero mostrar autenticación y luego configuración
+    isAuthModalOpen.value = true
   } else {
     setTenant(configStore.ruc)
   }
@@ -157,4 +183,3 @@ onUnmounted(() => {
   object-fit: contain;
 }
 </style>
-

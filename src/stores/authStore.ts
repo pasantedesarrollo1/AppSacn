@@ -3,7 +3,7 @@ import { ref } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => {
   const accessCode = '123456';
-  const isAuthenticated = ref(false);
+  const isAuthenticated = ref(true); // Inicialmente autenticado para permitir acceso a la app
   const isFirstOpen = ref(true);
   const showSplashScreen = ref(true);
   const showAuthModal = ref(false);
@@ -18,7 +18,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   function setSplashScreenShown() {
     showSplashScreen.value = false;
-    showAuthModal.value = true;
   }
 
   function setAuthModalShown(value: boolean) {
